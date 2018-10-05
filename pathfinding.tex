@@ -1,0 +1,194 @@
+\documentclass[12pt]{report}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage[parfill]{parskip}  				% Newlines create actual paragraphs
+\usepackage{algorithm} 						% For pseudocode
+\usepackage{algpseudocode}  			% For pseudocode
+
+% Add spacing between theorems, which is zeroed by parskip
+\makeatletter
+\def\thm@space@setup{%
+  \thm@preskip=\parskip \thm@postskip=0pt
+}
+\makeatother
+
+% Theorem keyword definitions
+\newtheorem{mydef}{Definition}
+
+\title{
+{Pathfinding algorithms in graphs and applications}\\
+{\large Universitat de Barcelona}
+}
+\author{Daniel Monzonís Laparra}
+
+\begin{document}
+\maketitle
+
+\chapter*{Abstract}
+Abstract goes here.
+
+\tableofcontents
+
+\chapter{Introduction}
+Introduction goes here.
+
+For most of the examples in the article we will be using a grid graph, represented by a tiled 2D map, in which each tile (or node) is connected to its adjacent tiles. In the map, each tile can have a different weight, or be a wall, which is impassable. This notion of weighted nodes and walls can be translated to the structure of a weighted directed graph by thinking of the weights of the tiles as the weights of the edges that connect adjacent tiles to it. Walls can be thought of as nodes that are not connected (or just non-existent) to any other node, and therefore not reachable from other nodes.
+
+\chapter{The A* algorithm}
+The A* algorithm is a very popular algorithm used in many applications to find the optimal path between two points. The algorithm works on graphs, a structure well studied in graph theory, so first we will refresh some definitions.
+
+\begin{mydef}
+A \textbf{directed graph} $G$ is a pair of sets $(V, E)$, where $V$ is the set of vertices or nodes, and $E$ the set of edges, formed by pairs of vertices.
+\end{mydef}
+
+\begin{mydef}
+A \textbf{weighted directed graph} is a graph in which $\forall e \in E \ \exists w(e) \in \mathbb{R}$. We call $w(e)$ the \textbf{weight} or \textbf{cost} of the edge $e$.
+\end{mydef}
+
+\begin{mydef}
+Given a graph $G$, and $u, v \in G$, a \textbf{path} $P$ between $u$ and $v$ is an ordered list of a certain amount of edges, $N$, in the form
+
+\[ P = \{(u,v_1), (v_1, v_2), \dots, (v_{N-2}, v_{N-1}), (v_{N-1}, v)\} \]
+
+\end{mydef}
+Note that paths are not unique. There may exist multiple paths between two nodes.
+
+\begin{mydef}
+Given a path $P$ in a weighted directed graph $G$, we define the \textbf{weight} or \textbf{distance} of the path, $dist(P)$, as
+
+\[ dist(P) = \sum_{e \in P} w(e) \]
+
+\end{mydef}
+
+\begin{mydef}
+Given a set of all the existing paths between two nodes $u$ and $v$, $X_{(u, v)}$, we will say that a path $P \in X_{(u,v)}$ is \textbf{optimal} if and only if $dist(P) \le dist(P') \ \forall P' \in X_{(u, v)}$.
+\end{mydef}
+
+Instead of presenting the A* algorithm without any background, we will first briefly discuss some other widely known algorithms that can be used to find paths between nodes in graphs, and build up to the main algorithm by trying to gradually improve the performance.
+
+
+
+\section{BFS}
+\textbf{Breadth-First Search}, or BFS, attempts to find a path by methodically examining all the neighbours of each node it examines.
+
+\begin{algorithm}
+\caption{Breadth-First Search}
+\begin{algorithmic}[1]
+\Procedure{BFS}{$G$, startNode, endNode}
+\State queue $\gets Queue()$
+\State visited $\gets Set()$
+\State previous $\gets Map()$
+\State queue.enqueue(startNode)
+\State visited.add(startNode)
+\While {not queue.empty()}
+	\State node = queue.front()
+	\State queue.dequeue()
+	\For {neighbour $\in$ node.neighbours()}
+		\If {neighbour not in visited}
+			\State queue.enqueue(neighbour)
+			\State visited.add(neighbour)
+			\State previous[neighbour] = node
+		\EndIf
+	\EndFor
+\EndWhile
+\State \Return ReconstructPath(previous, startNode, endNode)
+\EndProcedure
+
+\Statex
+
+\Procedure{ReconstructPath}{previous, startNode, endNode}
+\State path = []  \Comment{Empty array}
+\State node = endNode
+\While {node $\neq$ startNode}
+	\State path.push(node)
+	\State node = previous[endNode]
+\EndWhile
+\State path.push(startNode)
+\State \Return path.reversed()
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+The algorithm uses a queue to keep track of the next nodes to examine, adding all unvisited neighbours of a node when it is examined, until the queue is empty.
+
+We see that with this version of BFS, all nodes in the connected component of the starting node are explored. We can improve performance if we perform an early exit, since we don't need to keep exploring once we find the end node.
+
+% TODO: Correctly place the algorithms
+
+\begin{algorithm}
+\caption{Breadth-First Search with early exit}
+\begin{algorithmic}[1]
+\Procedure{BFS}{$G$, startNode, endNode}
+\State queue $\gets Queue()$
+\State visited $\gets Set()$
+\State previous $\gets Map()$
+\State queue.enqueue(startNode)
+\State visited.add(startNode)
+\While {not queue.empty()}
+	\State node = queue.front()
+	\State queue.dequeue()
+	\For {neighbour $\in$ node.neighbours()}
+		\If {neighbour not in visited}
+			\If {neighbour $=$ endNode} \Comment{Early exit condition}
+				\State \Return ReconstructPath(previous,startNode,endNode)
+			\EndIf
+			\State queue.enqueue(neighbour)
+			\State visited.add(neighbour)
+			\State previous[neighbour] = node
+		\EndIf
+	\EndFor
+\EndWhile
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+Note that, even though BFS will always find a path between two nodes if they are connected, the path produced is not optimal when we consider weights. The path found will be the shortest in terms of the number of steps, but when taking into account the weights of the edges, this algorithm will not give us the shortest distance path.
+
+% TODO: Put example images
+
+On  the other hand, the algorithm doesn't seem very efficient, since we can potentially explore lots of nodes on a very dense graph.
+
+We will first address the optimality problem in the next algorithm, and then we will focus on efficiency.
+
+\section{Dijkstra}
+The Dijkstra algorithm is also a well known graph theory algorithm, used to find the optimal path between two nodes in a graph with positive weights. Now, instead of a simple queue, we use a priority queue. We keep exploring all unvisited neighbours of a node, but now we insert them in the priority queue using the distance of the edge.
+
+% TODO: Finish
+\begin{algorithm}
+\caption{Dijkstra's algorithm}
+\begin{algorithmic}[1]
+\Procedure{Dijkstra}{$G$, startNode, endNode}
+\State queue $\gets PriorityQueue()$
+\State visited $\gets Set()$
+\State previous $\gets Map()$
+\State queue.insert((0, startNode))
+\State visited.add(startNode)
+\While {not queue.empty()}
+	\State node = queue.removeMin()
+	\For {neighbour $\in$ node.neighbours()}
+		\If {neighbour not in visited}
+			\If {neighbour $=$ endNode} \Comment{Early exit condition}
+				\State \Return ReconstructPath(previous,startNode,endNode)
+			\EndIf
+			\State queue.enqueue(neighbour)
+			\State visited.add(neighbour)
+			\State previous[neighbour] = node
+		\EndIf
+	\EndFor
+\EndWhile
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+% TODO: Proof of correctness of Dijkstra
+% TODO: Talk about what happens when there are negative weights. Name Bellman-Ford algorithm.
+
+\section{Greedy Best-First search}
+Greedy goes here
+
+\section{A*}
+A* goes here
+
+
+\end{document}
