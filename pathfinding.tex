@@ -14,7 +14,10 @@
 \makeatother
 
 % Theorem keyword definitions
-\newtheorem{mydef}{Definition}
+\newtheorem{theorem}{Theorem}[chapter]
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
 
 \title{
 {Pathfinding algorithms in graphs and applications}\\
@@ -38,35 +41,54 @@ For most of the examples in the article we will be using a grid graph, represent
 \chapter{The A* algorithm}
 The A* algorithm is a very popular algorithm used in many applications to find the optimal path between two points. The algorithm works on graphs, a structure well studied in graph theory, so first we will refresh some definitions.
 
-\begin{mydef}
+\begin{definition}
 A \textbf{directed graph} $G$ is a pair of sets $(V, E)$, where $V$ is the set of vertices or nodes, and $E$ the set of edges, formed by pairs of vertices.
-\end{mydef}
+\end{definition}
 
-\begin{mydef}
+\begin{definition}
 A \textbf{weighted directed graph} is a graph in which $\forall e \in E \ \exists w(e) \in \mathbb{R}$. We call $w(e)$ the \textbf{weight} or \textbf{cost} of the edge $e$.
-\end{mydef}
 
-\begin{mydef}
-Given a graph $G$, and $u, v \in G$, a \textbf{path} $P$ between $u$ and $v$ is an ordered list of a certain amount of edges, $N$, in the form
+If $e = (u, v)$ for some $u, v \in V$, then we equivalently call $d(u, v) = w(e)$ the \textbf{distance} from $u$ to $v$.
+\end{definition}
+
+\begin{definition}[Path]
+Given a graph $G$, and $u, v \in V$, a \textbf{path} $P$ between $u$ and $v$ is an ordered list of a certain amount of edges, $N$, in the form
 
 \[ P = \{(u,v_1), (v_1, v_2), \dots, (v_{N-2}, v_{N-1}), (v_{N-1}, v)\} \]
 
-\end{mydef}
+\end{definition}
 Note that paths are not unique. There may exist multiple paths between two nodes.
 
-\begin{mydef}
+\begin{definition}
+We say that two nodes $u, v \in V$ are connected $\Longleftrightarrow$ There exists a path $P$ between $u$ and $v$.
+\end{definition}
+
+\begin{definition}
+If $u \in V$, we define the \textbf{connected component} of $u$ as
+\[ C_u = \{ v \in V\ |\ u \ \text{and} \ v \ \text{are connected}\  \} \]
+\end{definition}
+
+\begin{definition}[Distance of a path]
 Given a path $P$ in a weighted directed graph $G$, we define the \textbf{weight} or \textbf{distance} of the path, $dist(P)$, as
 
-\[ dist(P) = \sum_{e \in P} w(e) \]
+\[ d(P) = \sum_{e \in P} w(e) \]
 
-\end{mydef}
+If $P$ is a path between $u$ and $v$, we can equivalently write
 
-\begin{mydef}
-Given a set of all the existing paths between two nodes $u$ and $v$, $X_{(u, v)}$, we will say that a path $P \in X_{(u,v)}$ is \textbf{optimal} if and only if $dist(P) \le dist(P') \ \forall P' \in X_{(u, v)}$.
-\end{mydef}
+\[ d_P(u, v) = d(P) \]
+
+If the context is clear, we will just write $d(u, v)$. For convenience, if $u$ and $v$ are not connected, we define the distance between them as $d(u, v) = \infty$.
+\end{definition}
+
+\begin{definition}[Optimal path]
+\label{def:optimal}
+Given a set of all the existing paths between two nodes $u$ and $v$, $X_{(u, v)}$, we will say that a path $P \in X_{(u,v)}$ is \textbf{optimal} if and only if $d(P) \le d(P') \ \forall P' \in X_{(u, v)}$.
+\end{definition}
+
+We will also say that P is the \textbf{shortest distance path} if it is optimal, and we will write the distance that fulfills the condition in definition \ref{def:optimal} as $\delta(u,v)$.
+
 
 Instead of presenting the A* algorithm without any background, we will first briefly discuss some other widely known algorithms that can be used to find paths between nodes in graphs, and build up to the main algorithm by trying to gradually improve the performance.
-
 
 
 \section{BFS}
@@ -74,6 +96,7 @@ Instead of presenting the A* algorithm without any background, we will first bri
 
 \begin{algorithm}
 \caption{Breadth-First Search}
+\label{alg:bfs}
 \begin{algorithmic}[1]
 \Procedure{BFS}{$G$, startNode, endNode}
 \State queue $\gets Queue()$
@@ -110,14 +133,13 @@ Instead of presenting the A* algorithm without any background, we will first bri
 \end{algorithmic}
 \end{algorithm}
 
-The algorithm uses a queue to keep track of the next nodes to examine, adding all unvisited neighbours of a node when it is examined, until the queue is empty.
+The algorithm uses a queue to keep track of the next nodes to examine, adding all unvisited neighbours of a node when it is examined, until the queue is empty. The pseudocode for the algorithm, as well as the procedure that we will use to reconstruct the path for all algorithms, is presented in algorithm \ref{alg:bfs}.
 
-We see that with this version of BFS, all nodes in the connected component of the starting node are explored. We can improve performance if we perform an early exit, since we don't need to keep exploring once we find the end node.
-
-% TODO: Correctly place the algorithms
+We see that with this version of BFS, all nodes in the connected component of the starting node are explored. We can improve performance if we perform an early exit, since we don't need to keep exploring once we find the end node, as shown in algorithm \ref{alg:bfs_early_exit}.
 
 \begin{algorithm}
 \caption{Breadth-First Search with early exit}
+\label{alg:bfs_early_exit}
 \begin{algorithmic}[1]
 \Procedure{BFS}{$G$, startNode, endNode}
 \State queue $\gets Queue()$
@@ -157,6 +179,7 @@ The Dijkstra algorithm is also a well known graph theory algorithm, used to find
 % TODO: Finish
 \begin{algorithm}
 \caption{Dijkstra's algorithm}
+\label{alg:dijkstra}
 \begin{algorithmic}[1]
 \Procedure{Dijkstra}{$G$, startNode, endNode}
 \State queue $\gets PriorityQueue()$
@@ -181,11 +204,60 @@ The Dijkstra algorithm is also a well known graph theory algorithm, used to find
 \end{algorithmic}
 \end{algorithm}
 
-% TODO: Proof of correctness of Dijkstra
+We will now prove the correctness of the algorithm without the early exit condition, that is, given a node $u \in V$, the algorithm always finds the optimal path between $u$ and all other nodes $v \in V$ such that $u$ and $v$ are connected. We will do so by induction on the visited set used in algorithm \ref{alg:dijkstra}, which we will call $S$. We will also write the distance computed by Dijkstra's algorithm between two nodes $u, v$ as $d_D(u, v)$.
+
+\begin{lemma}
+\label{lemma:dijkstra}
+At any given step of the algorithm, $\forall s \in S,\ d_D(u, s) = \delta(u, s)$
+\end{lemma}
+\begin{proof}
+If $|S| = 0$, the statement is trivially true.
+
+If $|S| = 1$, it must be $S = \{u\}$, since $S$ only grows in size, but $d_D(u, u) = 0 = \delta(u, u)$.
+
+Now let's assume we are in an arbitrary step, and let $s$ be the current node being explored, not yet added to $S$. Let $S' = S \cup \{s\}$. By inductive hypothesis, we know that $\forall t \in S,\ d_D(u, t) = \delta(u, t)$. Now we only need to show that $d_D(u, s) = \delta(u, s)$.
+
+Suppose that there exists a path $Q$ from $u$ to $s$ such that
+\[d(Q) < d_D(u, s)\]
+We know that the path $Q$ starts in $S$ (since $u \in S$), but at some point has to leave $S$ (since $s \not\in S$). Let $e = (x, y) \in Q \subset E$ be the first edge that leaves $S$, that is, $x \in S$ but $y \not\in S$. Let $Q_x \subset Q$ be the edges of $Q$ up until and without including the edge $e$. Clearly,
+\[d(Q_x) + d(x, y) \le d(Q)\]
+
+By the induction hypothesis, $d_D(u, x) = \delta(u, x) \le d(Q_x)$. Therefore,
+\[ d_D(u, x) + d(x, y) \le d(Q) \]
+
+Clearly, $\delta(u, y) \le d_D(u, x) + d(x, y)$.
+
+Since $y \not\in S$, and since Dijkstra uses a priority queue to select the next reachable node with minimum distance, we know that $d_D(u, s) \le d_D(u, y)$.
+
+Combining the inequalities, we get that
+\[ d_D(u, s) \le d_D(u, y) \le d_D(u, x) + d(x, y) \le d(Q) < d_D(u, s) \]
+which is a contradiction.
+
+Therefore, $d_D(u, s) = \delta(u, s)$.
+\end{proof}
+
+\begin{theorem}[Correctness of Dijkstra's algorithm]
+\label{thm:dijkstra}
+Let $G = (V, E)$ be a weighted directed graph. Let $u \in V$. Then, after running Dijkstra's algorithm with start node $u$, the following is true
+\[ \forall v \in C_u,\  d_D(u, v) = \delta(u, v) \]
+\end{theorem}
+\begin{proof}
+We know that, at the end of Dijkstra's algorithm, we'll have explored all the nodes connected to $u$. That is, $S = C_u$. For each $v \in C_u$, apply \ref{lemma:dijkstra} to get the wanted result.
+\end{proof}
+
+Like with BFS, we can modify the algorithm to use early exit to improve performance.
+\begin{lemma}
+Using Dijkstra's algorithm with early exit with start node $u$ and end node $v$ ensures that $d_D(u, v) = \delta(u, v)$.
+\end{lemma}
+\begin{proof}
+With early exit, when we explore node $v$ we will end the execution of the algorithm. Using \ref{lemma:dijkstra}, we know that $d_D(u, v) = \delta(u, v)$, so we already have the optimal path between the two nodes.
+\end{proof}
+
 % TODO: Talk about what happens when there are negative weights. Name Bellman-Ford algorithm.
+Note that Dijkstra's algorithm only works for graphs with positive weights. For graphs with negative weights, there are other less efficient algorithms which also find optimal paths, like the Bellman-Ford algorithm.
 
 \section{Greedy Best-First search}
-Greedy goes here
+As we have seen in the last section, we now have an algorithm that can find the optimal path between any two nodes in a graph with positive weights. We will now strive to make the algorith
 
 \section{A*}
 A* goes here
