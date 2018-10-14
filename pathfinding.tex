@@ -98,7 +98,9 @@ Instead of presenting the A* algorithm without any background, we will first bri
 \section{BFS}
 Breadth-First Search, or BFS for short, attempts to find a path by methodically examining all the neighbours of each node it examines.
 
-The algorithm uses a queue to keep track of the next nodes to examine, adding all unvisited neighbours of a node when it is examined, until the queue is empty. The pseudocode for the algorithm is presented in algorithm \ref{alg:bfs}. The algorithm returns a map called \emph{previous}, which maps every node to the node we came from in the path that the algorithm computes. The procedure that we will use to reconstruct the path from this map for all algorithms is presented in algorithm \ref{alg:reconstruct}.
+The algorithm uses a queue to keep track of the next nodes to examine, adding all unvisited neighbours of a node when it is examined, until the queue is empty. Explored nodes are kept in a set, so that we don't explore the same node twice. The queue of nodes to be explored is often called the \emph{open set}, and the set of visited nodes the \emph{closed set}.
+
+The pseudocode for the algorithm is presented in algorithm \ref{alg:bfs}. The algorithm returns a map called \emph{previous}, which maps every node to the node we came from in the path that the algorithm computes. The procedure that we will use to reconstruct the path from this map for all algorithms is presented in algorithm \ref{alg:reconstruct}.
 
 \begin{algorithm}
 \caption{Breadth-First Search}
@@ -346,7 +348,68 @@ In Dijkstra, we used the actual distances of the paths between nodes for the pri
 \section{A*}
 As we have seen, Dijkstra always gives us optimal paths, but it wastes a lot of time exploring a lot of nodes that are not in a promising direction. On the other hand, Greedy Best-First Search explores nodes in a promising direction, but does not produce optimal paths reliably.
 
-The A* algorithm is a combination of the best of both algorithms. It takes into account both the actual distance from the source to a node, and the estimated distance from the node to the goal.
+The A* algorithm is a combination of both algorithms. It takes into account both the actual distance from the source to a node, and the estimated distance from the node to the goal.
+
+\begin{definition}
+Given a source and goal nodes in a graph $G = (V, E)$, we define the \textbf{score} as the application
+\begin{align*}
+	f \colon V &\to \mathbb{R}\\
+	u &\mapsto f(u) = g(u) + h(u)
+\end{align*}
+where $g(u)$ is the exact cost of the path from the source to the node $u$ that the algorithm currently has, and $h(u)$ is the heuristic, which is an estimate of the distance from the node $u$ to the goal.
+We will call $g$ the \textbf{g-score}, and $h$ the \textbf{h-score}.
+\end{definition}
+
+When a node is explored, its g- score, and thus its score will be updated. The pseudocode for the algorithm is shown in algorithm \ref{alg:astar}. As we can see, it's very similar to Dijkstra's, except that we now use the score for the priority queue ordering, instead of just the distance to that node.
+
+This new algorithm is faster than Dijkstra, but it only finds optimal paths within a certain condition, which is what we will prove next.
+
+\begin{definition}
+A heuristic function $h$ is said to be \textbf{admissible} if, $\forall u \in V$, $h(u)$ never overestimates the real cost of moving from $u$ to the goal, that is, if $P_u$ is an optimal path from $u$ to the goal, then $\forall u \in V \ h(u) \le d(P_u)$.
+\end{definition}
+
+
+
+\begin{algorithm}
+\caption{A* algorithm}
+\label{alg:astar}
+\begin{algorithmic}[1]
+\Procedure{AStar}{$G$, $\alpha$, $\beta$}
+\Require Graph $G = (V, E)$, directed or undirected; source node $\alpha \in V$; goal node $\beta \in V$
+\Ensure Given $u \in G$, previous[$u$] gives us the node come from to reach $u$ in the path computed, and g[$u$] is the current g-score of the node
+\State Q $\gets PriorityQueue()$
+\State S $\gets Set()$
+\State g $\gets Map()$
+\State previous $\gets Map()$
+\For {u $\in G$}
+	\State g[u] $\gets \infty$
+	\State previous[u] $\gets$ null
+\EndFor
+\State Q.insert((0, $\alpha$))
+\State g[$\alpha$] $\gets 0$
+\While {not Q.empty()}
+	\State u $\gets$ Q.removeMin()
+	\State S.add(u)
+	\If {u $= \beta$} \Comment{Early exit condition}
+		\State \Return ReconstructPath(previous,$\alpha$,$\beta$)
+	\EndIf
+	\For {v $\in$ u.neighbours()}
+		\If {v $\in S$}
+			\Continue \Comment{Already explored node}
+		\EndIf
+		\State alt $\gets$ g[u] $+ w((u, v))$
+		\If {alt $<$ g[v]}
+			\State g[v] $\gets$ alt \Comment{Update the g-score}
+			\State $f = g[v] + h(v)$
+			\State Q.insert((v, f))
+			\State previous[v] $\gets$ u
+		\EndIf
+	\EndFor
+\EndWhile
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
 
 \chapter{Heuristics}
 Maybe a short chapter about heuristics?
