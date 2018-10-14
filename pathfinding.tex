@@ -95,23 +95,26 @@ We will also say that P is the \textbf{shortest distance path} if it is optimal,
 
 Instead of presenting the A* algorithm without any background, we will first briefly discuss some other widely known algorithms that can be used to find paths between nodes in graphs, and build up to the main algorithm by trying to gradually improve the performance.
 
-
 \section{BFS}
-\textbf{Breadth-First Search}, or BFS, attempts to find a path by methodically examining all the neighbours of each node it examines.
+Breadth-First Search, or BFS for short, attempts to find a path by methodically examining all the neighbours of each node it examines.
+
+The algorithm uses a queue to keep track of the next nodes to examine, adding all unvisited neighbours of a node when it is examined, until the queue is empty. The pseudocode for the algorithm is presented in algorithm \ref{alg:bfs}. The algorithm returns a map called \emph{previous}, which maps every node to the node we came from in the path that the algorithm computes. The procedure that we will use to reconstruct the path from this map for all algorithms is presented in algorithm \ref{alg:reconstruct}.
 
 \begin{algorithm}
 \caption{Breadth-First Search}
 \label{alg:bfs}
 \begin{algorithmic}[1]
-\Procedure{BFS}{$G$, source, goal}
+\Procedure{BFS}{$G, \alpha, \beta$}
+\Require Graph $G = (V, E)$, directed or undirected; source node $\alpha \in V$; goal node $\beta \in V$
+\Ensure Given $u \in G$, previous[$u$] gives us the node come from to reach $u$ in the path computed
 \State Q $\gets Queue()$
 \State S $\gets Set()$ \Comment{Keeps track of explored nodes}
 \State previous $\gets Map()$
 \For {u $\in G$}
 	\State previous[u] $\gets$ null
 \EndFor
-\State Q.enqueue(source)
-\State S.add(source)
+\State Q.enqueue($\alpha$)
+\State S.add($\alpha$)
 \While {not Q.empty()}
 	\State u $\gets$ Q.front()
 	\State Q.dequeue()
@@ -123,25 +126,29 @@ Instead of presenting the A* algorithm without any background, we will first bri
 		\EndIf
 	\EndFor
 \EndWhile
-\State \Return ReconstructPath(previous, source, goal)
-\EndProcedure
-
-\Statex
-
-\Procedure{ReconstructPath}{previous, source, goal}
-\State P $\gets$ []  \Comment{Empty array for the path}
-\State u $\gets$ goal
-\While {u $\neq$ source}
-	\State P.push(u)
-	\State u $\gets$ previous[goal]
-\EndWhile
-\State P.push(source)
-\State \Return P.reversed()
+\State \Return ReconstructPath(previous, $\alpha$, $\beta$)
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}
 
-The algorithm uses a queue to keep track of the next nodes to examine, adding all unvisited neighbours of a node when it is examined, until the queue is empty. The pseudocode for the algorithm, as well as the procedure that we will use to reconstruct the path for all algorithms, is presented in algorithm \ref{alg:bfs}.
+\begin{algorithm}
+\caption{Reconstruct path}
+\label{alg:reconstruct}
+\begin{algorithmic}[1]
+\Procedure{ReconstructPath}{previous, $\alpha$, $\beta$}
+\Require The map $previous$ returned by the pathfinding algorithm; source node $\alpha \in V$; goal node $\beta \in V$
+\Ensure An ordered list $P$ with the nodes from the path from $\alpha$ to $\beta$
+\State $P \gets$ []  \Comment{Empty array for the path}
+\State u $\gets \beta$
+\While {u $\neq \alpha$}
+	\State $P$.push(u)
+	\State u $\gets$ previous[$\beta$]
+\EndWhile
+\State $P$.push($\alpha$)
+\State \Return $P$.reversed()
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
 
 We see that with this version of BFS, all nodes in the connected component of the starting node are explored. We can improve performance if we perform an early exit, since we don't need to keep exploring once we find the end node, as shown in algorithm \ref{alg:bfs_early_exit}.
 
@@ -149,22 +156,24 @@ We see that with this version of BFS, all nodes in the connected component of th
 \caption{Breadth-First Search with early exit}
 \label{alg:bfs_early_exit}
 \begin{algorithmic}[1]
-\Procedure{BFS}{$G$, source, goal}
+\Procedure{BFS}{$G, \alpha, \beta$}
+\Require Graph $G = (V, E)$, directed or undirected; source node $\alpha \in V$; goal node $\beta \in V$
+\Ensure Given $u \in G$, previous[$u$] gives us the node come from to reach $u$ in the path computed, if it has been explored
 \State Q $\gets Queue()$
 \State S $\gets Set()$
 \State previous $\gets Map()$
 \For {u $\in G$}
 	\State previous[u] $\gets$ null
 \EndFor
-\State Q.enqueue(source)
-\State S.add(source)
+\State Q.enqueue($\alpha$)
+\State S.add($\alpha$)
 \While {not Q.empty()}
 	\State u $\gets$ Q.front()
 	\State Q.dequeue()
 	\For {v $\in$ u.neighbours()}
 		\If {v $\not\in$ S}
-			\If {v $=$ goal} \Comment{Early exit condition}
-				\State \Return ReconstructPath(previous,source,goal)
+			\If {v $= \beta$} \Comment{Early exit condition}
+				\State \Return ReconstructPath(previous,$\alpha$,$\beta$)
 			\EndIf
 			\State Q.enqueue(v)
 			\State S.add(v)
@@ -193,7 +202,9 @@ Normally, the algorithm only gets a starting node, and computes the optimal path
 \caption{Dijkstra's algorithm}
 \label{alg:dijkstra}
 \begin{algorithmic}[1]
-\Procedure{Dijkstra}{$G$, source, goal}
+\Procedure{Dijkstra}{$G$, $\alpha$, $\beta$}
+\Require Graph $G = (V, E)$, directed or undirected; source node $\alpha \in V$; goal node $\beta \in V$
+\Ensure Given $u \in G$, previous[$u$] gives us the node come from to reach $u$ in the path computed, and d[$u$] gives us the distance to that node, if it has been explored
 \State Q $\gets PriorityQueue()$
 \State S $\gets Set()$
 \State d $\gets Map()$ \Comment{Keeps track of the shortest distance to each node}
@@ -202,13 +213,13 @@ Normally, the algorithm only gets a starting node, and computes the optimal path
 	\State d[u] $\gets \infty$
 	\State previous[u] $\gets$ null
 \EndFor
-\State Q.insert((0, source))
-\State d[source] $\gets 0$
+\State Q.insert((0, $\alpha$))
+\State d[$\alpha$] $\gets 0$
 \While {not Q.empty()}
 	\State u $\gets$ Q.removeMin()
 	\State S.add(u)
-	\If {u $=$ goal} \Comment{Early exit condition}
-		\State \Return ReconstructPath(previous,source,goal)
+	\If {u $= \beta$} \Comment{Early exit condition}
+		\State \Return ReconstructPath(previous,$\alpha$,$\beta$)
 	\EndIf
 	\For {v $\in$ u.neighbours()}
 		\If {v $\in S$}
@@ -296,19 +307,21 @@ In Dijkstra, we used the actual distances of the paths between nodes for the pri
 \caption{Greedy Best-First search}
 \label{alg:greedy}
 \begin{algorithmic}[1]
-\Procedure{GreedyBestFirstSearch}{$G$, source, goal}
+\Procedure{GreedyBestFirstSearch}{$G$, $\alpha$, $\beta$}
+\Require Graph $G = (V, E)$, directed or undirected; source node $\alpha \in V$; goal node $\beta \in V$
+\Ensure Given $u \in G$, previous[$u$] gives us the node come from to reach $u$ in the path computed, if it has been explored
 \State Q $\gets PriorityQueue()$
 \State S $\gets Set()$
 \State previous $\gets Map()$
 \For {u $\in G$}
 	\State previous[u] $\gets$ null
 \EndFor
-\State Q.insert((0, source))
+\State Q.insert((0, $\alpha$))
 \While {not Q.empty()}
 	\State u $\gets$ queue.removeMin()
 	\State S.add(u)
-	\If {u $=$ goal} \Comment{Early exit condition}
-		\State \Return ReconstructPath(previous,source,goal)
+	\If {u $= \beta$} \Comment{Early exit condition}
+		\State \Return ReconstructPath(previous,$\alpha$,$\beta$)
 	\EndIf
 	\For {v $\in$ u.neighbours()}
 		\If {v $\in S$}
@@ -328,8 +341,12 @@ In Dijkstra, we used the actual distances of the paths between nodes for the pri
 %The \textbf{Manhattan distance} between two points %TODO FINISH
 %\end{definition}
 
+%TODO Talk about the problems with the greedy search
+
 \section{A*}
-A* goes here
+As we have seen, Dijkstra always gives us optimal paths, but it wastes a lot of time exploring a lot of nodes that are not in a promising direction. On the other hand, Greedy Best-First Search explores nodes in a promising direction, but does not produce optimal paths reliably.
+
+The A* algorithm is a combination of the best of both algorithms. It takes into account both the actual distance from the source to a node, and the estimated distance from the node to the goal.
 
 \chapter{Heuristics}
 Maybe a short chapter about heuristics?
