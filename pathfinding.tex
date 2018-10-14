@@ -13,6 +13,11 @@
 }
 \makeatother
 
+% algpseudocode modifications
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+\renewcommand{\algorithmicensure}{\textbf{Output:}}
+\algnewcommand{\Continue}{\State \textbf{continue}}
+
 % Theorem keyword definitions
 \newtheorem{theorem}{Theorem}[chapter]
 \newtheorem{definition}[theorem]{Definition}
@@ -98,37 +103,40 @@ Instead of presenting the A* algorithm without any background, we will first bri
 \caption{Breadth-First Search}
 \label{alg:bfs}
 \begin{algorithmic}[1]
-\Procedure{BFS}{$G$, startNode, endNode}
-\State queue $\gets Queue()$
-\State visited $\gets Set()$
+\Procedure{BFS}{$G$, source, goal}
+\State Q $\gets Queue()$
+\State S $\gets Set()$ \Comment{Keeps track of explored nodes}
 \State previous $\gets Map()$
-\State queue.enqueue(startNode)
-\State visited.add(startNode)
-\While {not queue.empty()}
-	\State node = queue.front()
-	\State queue.dequeue()
-	\For {neighbour $\in$ node.neighbours()}
-		\If {neighbour not in visited}
-			\State queue.enqueue(neighbour)
-			\State visited.add(neighbour)
-			\State previous[neighbour] = node
+\For {u $\in G$}
+	\State previous[u] $\gets$ null
+\EndFor
+\State Q.enqueue(source)
+\State S.add(source)
+\While {not Q.empty()}
+	\State u $\gets$ Q.front()
+	\State Q.dequeue()
+	\For {v $\in$ u.neighbours()}
+		\If {v $\not\in$ S}
+			\State Q.enqueue(v)
+			\State S.add(v)
+			\State previous[v] $\gets$ u
 		\EndIf
 	\EndFor
 \EndWhile
-\State \Return ReconstructPath(previous, startNode, endNode)
+\State \Return ReconstructPath(previous, source, goal)
 \EndProcedure
 
 \Statex
 
-\Procedure{ReconstructPath}{previous, startNode, endNode}
-\State path = []  \Comment{Empty array}
-\State node = endNode
-\While {node $\neq$ startNode}
-	\State path.push(node)
-	\State node = previous[endNode]
+\Procedure{ReconstructPath}{previous, source, goal}
+\State P $\gets$ []  \Comment{Empty array for the path}
+\State u $\gets$ goal
+\While {u $\neq$ source}
+	\State P.push(u)
+	\State u $\gets$ previous[goal]
 \EndWhile
-\State path.push(startNode)
-\State \Return path.reversed()
+\State P.push(source)
+\State \Return P.reversed()
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}
@@ -141,23 +149,26 @@ We see that with this version of BFS, all nodes in the connected component of th
 \caption{Breadth-First Search with early exit}
 \label{alg:bfs_early_exit}
 \begin{algorithmic}[1]
-\Procedure{BFS}{$G$, startNode, endNode}
-\State queue $\gets Queue()$
-\State visited $\gets Set()$
+\Procedure{BFS}{$G$, source, goal}
+\State Q $\gets Queue()$
+\State S $\gets Set()$
 \State previous $\gets Map()$
-\State queue.enqueue(startNode)
-\State visited.add(startNode)
-\While {not queue.empty()}
-	\State node = queue.front()
-	\State queue.dequeue()
-	\For {neighbour $\in$ node.neighbours()}
-		\If {neighbour not in visited}
-			\If {neighbour $=$ endNode} \Comment{Early exit condition}
-				\State \Return ReconstructPath(previous,startNode,endNode)
+\For {u $\in G$}
+	\State previous[u] $\gets$ null
+\EndFor
+\State Q.enqueue(source)
+\State S.add(source)
+\While {not Q.empty()}
+	\State u $\gets$ Q.front()
+	\State Q.dequeue()
+	\For {v $\in$ u.neighbours()}
+		\If {v $\not\in$ S}
+			\If {v $=$ goal} \Comment{Early exit condition}
+				\State \Return ReconstructPath(previous,source,goal)
 			\EndIf
-			\State queue.enqueue(neighbour)
-			\State visited.add(neighbour)
-			\State previous[neighbour] = node
+			\State Q.enqueue(v)
+			\State S.add(v)
+			\State previous[v] $\gets$ u
 		\EndIf
 	\EndFor
 \EndWhile
@@ -167,7 +178,7 @@ We see that with this version of BFS, all nodes in the connected component of th
 
 Note that, even though BFS will always find a path between two nodes if they are connected, the path produced is not optimal when we consider weights. The path found will be the shortest in terms of the number of steps, but when taking into account the weights of the edges, this algorithm will not give us the shortest distance path.
 
-% TODO: Put example images
+%TODO Put example images
 
 On  the other hand, the algorithm doesn't seem very efficient, since we can potentially explore lots of nodes on a very dense graph.
 
@@ -176,27 +187,38 @@ We will first address the optimality problem in the next algorithm, and then we 
 \section{Dijkstra}
 The Dijkstra algorithm is also a well known graph theory algorithm, used to find the optimal path between two nodes in a graph with positive weights. Now, instead of a simple queue, we use a priority queue. We keep exploring all unvisited neighbours of a node, but now we insert them in the priority queue using the distance of the edge.
 
-% TODO: Finish
+Normally, the algorithm only gets a starting node, and computes the optimal paths to all reachable nodes from the origin, but since we're only concerned about finding the path from one specific node to another, we will use the early exit condition to end the execution as soon as we explore the goal node. We will later see that this still gives us the optimal path.
+
 \begin{algorithm}
 \caption{Dijkstra's algorithm}
 \label{alg:dijkstra}
 \begin{algorithmic}[1]
-\Procedure{Dijkstra}{$G$, startNode, endNode}
-\State queue $\gets PriorityQueue()$
-\State visited $\gets Set()$
+\Procedure{Dijkstra}{$G$, source, goal}
+\State Q $\gets PriorityQueue()$
+\State S $\gets Set()$
+\State d $\gets Map()$ \Comment{Keeps track of the shortest distance to each node}
 \State previous $\gets Map()$
-\State queue.insert((0, startNode))
-\State visited.add(startNode)
-\While {not queue.empty()}
-	\State node = queue.removeMin()
-	\For {neighbour $\in$ node.neighbours()}
-		\If {neighbour not in visited}
-			\If {neighbour $=$ endNode} \Comment{Early exit condition}
-				\State \Return ReconstructPath(previous,startNode,endNode)
-			\EndIf
-			\State queue.enqueue(neighbour)
-			\State visited.add(neighbour)
-			\State previous[neighbour] = node
+\For {u $\in G$}
+	\State d[u] $\gets \infty$
+	\State previous[u] $\gets$ null
+\EndFor
+\State Q.insert((0, source))
+\State d[source] $\gets 0$
+\While {not Q.empty()}
+	\State u $\gets$ Q.removeMin()
+	\State S.add(u)
+	\If {u $=$ goal} \Comment{Early exit condition}
+		\State \Return ReconstructPath(previous,source,goal)
+	\EndIf
+	\For {v $\in$ u.neighbours()}
+		\If {v $\in S$}
+			\Continue \Comment{Already explored node}
+		\EndIf
+		\State alt $\gets$ d[u] $+ w((u, v))$
+		\If {alt $<$ d[v]}
+			\State d[v] $\gets$ alt
+			\State Q.insert((v, alt))
+			\State previous[v] $\gets$ u
 		\EndIf
 	\EndFor
 \EndWhile
@@ -247,7 +269,7 @@ We know that, at the end of Dijkstra's algorithm, we'll have explored all the no
 
 Like with BFS, we can modify the algorithm to use early exit to improve performance.
 \begin{lemma}
-Using Dijkstra's algorithm with early exit with start node $u$ and end node $v$ ensures that $d_D(u, v) = \delta(u, v)$.
+Using Dijkstra's algorithm with early exit with start node $u$ and end node $v$ ensures that $d_D(u, v) = \delta(u, v)$.alt
 \end{lemma}
 \begin{proof}
 With early exit, when we explore node $v$ we will end the execution of the algorithm. Using \ref{lemma:dijkstra}, we know that $d_D(u, v) = \delta(u, v)$, so we already have the optimal path between the two nodes.
@@ -257,10 +279,62 @@ With early exit, when we explore node $v$ we will end the execution of the algor
 Note that Dijkstra's algorithm only works for graphs with positive weights. For graphs with negative weights, there are other less efficient algorithms which also find optimal paths, like the Bellman-Ford algorithm.
 
 \section{Greedy Best-First search}
-As we have seen in the last section, we now have an algorithm that can find the optimal path between any two nodes in a graph with positive weights. We will now strive to make the algorith
+As we have seen in the last section, we now have an algorithm that can find the optimal path between any two nodes in a graph with positive weights. We will now start to worry about improving the performance of the algorithms.
+
+Let's forget about optimality for a while, and modify our pathfinding algorithm to use only an heuristic. An heuristic is a function
+\begin{align*}
+	h \colon V &\to \mathbb{R}\\
+	u &\mapsto h(u)
+\end{align*}
+which gives an estimate of the true distance from a node to the goal node, which we compute without having to expand extra nodes, and varies with each type of problem we have.
+
+We will talk more about heuristics later, but for now, let's consider what happens when we use heuristics instead of the actual distance of the paths between nodes, like we did in Dijkstra's algorithm, for the priority queue ordering. 
+
+In Dijkstra, we used the actual distances of the paths between nodes for the priority queue ordering. Now, we will use the heuristic, so that the node closest to the goal will be the first to be explored.
+
+\begin{algorithm}
+\caption{Greedy Best-First search}
+\label{alg:greedy}
+\begin{algorithmic}[1]
+\Procedure{GreedyBestFirstSearch}{$G$, source, goal}
+\State Q $\gets PriorityQueue()$
+\State S $\gets Set()$
+\State previous $\gets Map()$
+\For {u $\in G$}
+	\State previous[u] $\gets$ null
+\EndFor
+\State Q.insert((0, source))
+\While {not Q.empty()}
+	\State u $\gets$ queue.removeMin()
+	\State S.add(u)
+	\If {u $=$ goal} \Comment{Early exit condition}
+		\State \Return ReconstructPath(previous,source,goal)
+	\EndIf
+	\For {v $\in$ u.neighbours()}
+		\If {v $\in S$}
+			\Continue
+		\EndIf
+		\State Q.insert((v, $h(v)$))
+		\State previous[v] $\gets$ u
+	\EndFor
+\EndWhile
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+%TODO Define tilemap as 2d discrete map
+%TODO Define manhattan distance
+%\begin{definition}
+%The \textbf{Manhattan distance} between two points %TODO FINISH
+%\end{definition}
 
 \section{A*}
 A* goes here
 
+\chapter{Heuristics}
+Maybe a short chapter about heuristics?
+
+\chapter{A* variants}
+Explain in detail some of the A* variants and how they improve the original algorithm.
 
 \end{document}
