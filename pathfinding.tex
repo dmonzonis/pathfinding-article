@@ -6,6 +6,7 @@
 \usepackage{algorithm} 						% For pseudocode
 \usepackage{algpseudocode}  					% For pseudocode
 \usepackage{hyperref}						% Adds hyperlinks
+\usepackage{bm}								% Bold math
 
 % Add spacing between theorems, which is zeroed by parskip
 \makeatletter
@@ -44,8 +45,8 @@ Many problems in the fields of science, mathematics and engineering can be gener
 
 For most of the examples in the article we will be using a grid graph, represented by a tiled 2D map, in which each tile (or node) is connected to its adjacent tiles. In the map, each tile can have a different weight, or be a wall, which is impassable. This notion of weighted nodes and walls can be translated to the structure of a weighted directed graph by thinking of the weights of the tiles as the weights of the edges that connect adjacent tiles to it. Walls can be thought of as nodes that are not connected (or just non-existent) to any other node, and therefore not reachable from other nodes. A pathfinding simulator was built for this article to help illustrate these examples.
 
-\chapter{The A* algorithm}
-The A* algorithm is a very popular algorithm used in many applications to find the optimal path between two points. The algorithm works on graphs, a structure well studied in graph theory, so first we will refresh some definitions.
+\chapter{The $A^*$ algorithm}
+The $A^*$ algorithm is a very popular algorithm used in many applications to find the optimal path between two points. The algorithm works on graphs, a structure well studied in graph theory, so first we will refresh some definitions.
 
 \begin{definition}
 A \textbf{directed graph} $G$ is a pair of sets $(V, E)$, where $V$ is the set of vertices or nodes, and $E$ the set of edges, formed by pairs of vertices.
@@ -99,12 +100,12 @@ Given a set of all the existing paths between two nodes $u$ and $v$, $X_{(u, v)}
 We will also say that P is the \textbf{shortest distance path} if it is optimal, and we will write the distance that fulfils the condition in definition \ref{def:optimal} as $\delta(u,v)$.
 
 
-Instead of presenting the A* algorithm without any background, we will first briefly discuss some other widely known algorithms that can be used to find paths between nodes in graphs, and build up to the main algorithm by trying to gradually improve the performance.
+Instead of presenting the $A^*$ algorithm without any background, we will first briefly discuss some other widely known algorithms that can be used to find paths between nodes in graphs, and build up to the main algorithm by trying to gradually improve the performance.
 
 \section{BFS}
 Breadth-First Search, or BFS for short, attempts to find a path by methodically examining all the neighbours of each node it examines.
 
-The algorithm uses a queue to keep track of the next nodes to examine, adding all unvisited neighbours of a node when it is examined, until the queue is empty. Explored nodes are kept in a set, so that we don't explore the same node twice. The queue of nodes to be explored is often called the \emph{open set}, and the set of visited nodes the \emph{closed set}.
+The algorithm uses a queue to keep track of the next nodes to examine, adding all unvisited neighbours of a node when it is examined, until the queue is empty. Explored nodes are kept in a set, so that we don't explore the same node twice. The set of nodes that haven't been explored yet is often called the \emph{open set}, and the set of visited nodes the \emph{closed set}.
 
 The pseudocode for the algorithm is presented in algorithm \ref{alg:bfs}. The algorithm returns a map called \emph{previous}, which maps every node to the node we came from in the path that the algorithm computes. The procedure that we will use to reconstruct the path from this map for all algorithms is presented in algorithm \ref{alg:reconstruct}.
 
@@ -351,10 +352,10 @@ In Dijkstra, we used the actual distances of the paths between nodes for the pri
 
 %TODO Talk about the problems with the greedy search
 
-\section{A*}
+\section{$A^*$}
 As we have seen, Dijkstra always gives us optimal paths, but it wastes a lot of time exploring a lot of nodes that are not in a promising direction. On the other hand, Greedy Best-First Search explores nodes in a promising direction, but does not produce optimal paths reliably.
 
-The A* algorithm is a combination of both algorithms. It takes into account both the actual distance from the source to a node, and the estimated distance from the node to the goal. Unlike Dijkstra's algorithm, which works for positive weights, A* only works with strictly positive weights.
+The $A^*$ algorithm is a combination of both algorithms. It takes into account both the actual distance from the source to a node, and the estimated distance from the node to the goal. Unlike Dijkstra's algorithm, which works for positive weights, $A^*$ only works with strictly positive weights.
 
 Given two connected nodes $\alpha, \beta \in V$, consider the optimal path between $alpha$ and $beta$, $P$. For any node $u$ that is part of $P$, we define a function $\hat{f}(u) = \hat{g}(u) + \hat{h}(u)$, where $\hat{g}(u) = \delta(\alpha, u)$ and $\hat{h}(u) = \delta(u, \beta)$. Note that for any other node $v$ in the optimal path $P$, $\hat{f}(u) = \hat{f}(v)$.
 
@@ -370,12 +371,12 @@ where $g(u)$ is an estimate of the optimal distance from the source to the node 
 We will call $g$ the \textbf{g-score}, and $h$ the \textbf{h-score}.
 \end{definition}
 
-In A*, a good choice for the g-score is using, for each node $u$, the cost of the path from the source to $u$ found so far by the algorithm, which would be equivalent to the distance map we kept updating in Dijkstra's algorithm. Note that this implies $g(u) \geq \hat{g}(u) \ \forall u \in V$. For the h-score, we will use some heuristic.
+In $A^*$, a good choice for the g-score is using, for each node $u$, the cost of the path from the source to $u$ found so far by the algorithm, which would be equivalent to the distance map we kept updating in Dijkstra's algorithm. Note that this implies $g(u) \geq \hat{g}(u) \ \forall u \in V$. For the h-score, we will use some heuristic.
 
 When a node is explored, its g-score, and thus its score will be updated. The pseudocode for the algorithm is shown in algorithm \ref{alg:astar}. As we can see, it's very similar to Dijkstra's, except that we now use the score for the priority queue ordering, instead of just the distance to that node.
 
 \begin{algorithm}
-\caption{A* algorithm}
+\caption{$A^*$ algorithm}
 \label{alg:astar}
 \begin{algorithmic}[1]
 \Procedure{AStar}{$G$, $\alpha$, $\beta$}
@@ -418,13 +419,14 @@ When a node is explored, its g-score, and thus its score will be updated. The ps
 This new algorithm is faster than Dijkstra, but it only finds optimal paths within a certain condition, which is what we will prove next.
 
 \begin{definition}
-A heuristic function $h$ is said to be \textbf{admissible} if, $\forall u \in V$, $h(u)$ never overestimates the real cost of moving from $u$ to the goal, that is, given a goal node $v \in V$, then $\forall u \in V \ h(u) \le \delta(u, v)$.
+A heuristic function $h$ is said to be \textbf{admissible} if, $\forall u \in V$, $h(u)$ never overestimates the real cost of moving from $u$ to the goal, that is, given a goal node $v \in V$, then $\forall u \in V \ h(u) \le \hat{h}(u) = \delta(u, v)$.
 \end{definition}
 
-We will prove that, with the score function we have constructed, A* finds optimal paths as long as the heuristic is admissible. As with Dijkstra's case, we will use the closed set $S$ and the open set $O$, which correspond to the visited set and the rest of nodes that haven't been taken out from the priority queue yet, respectively.
+We will prove that, with the score function we have constructed, $A^*$ finds optimal paths as long as the heuristic is admissible. Consider a graph $G = (V, E)$, a source node $\alpha$ and a goal node $\beta$, such that $\alpha$ and $\beta$ are connected. Consider the closed set $S$, which corresponds to the set of visited nodes in the algorithm, and the open set $O$, which are the nodes that haven't been explored yet.
 
 \begin{lemma}
-Consider a graph $G = (V, E)$, a source node $\alpha$ and a goal node $\beta$, such that $\alpha$ and $\beta$ are connected. For any node $u \not \in S$ and for any optimal path $P$ from $\alpha$ to $u$, $\exists v \in O$ which is part of $P$ such that $g(v) = \hat{g}(v)$.
+\label{lemma:astar1}
+ For any node $u \not \in S$ and for any optimal path $P$ from $\alpha$ to $u$, $\exists v \in O$ which is part of $P$ such that $g(v) = \hat{g}(v)$.
 \end{lemma}
 \begin{proof}
 Consider an optimal path from $\alpha$ to $u$,
@@ -438,25 +440,46 @@ $\Delta$ is clearly not empty since $\alpha \in \Delta$.
 
 Let $n^* \in \Delta$ be the node that satisfies $d_P(\alpha, n^*) \leq d_P(\alpha, n) \  \forall n \in \Delta$. Since $w(e) > 0\  \forall e \in E$, $n^*$ is unique. Also, $n^* \neq u$ since $u \not \in S$. Let $v$ be the node in $P$ which comes after $n^*$, that is, $(n^*, v) \in P$. Note that it's possible that $v = u$.
 
-Now, $g(v) \leq g(n^*) + w((n^*, v))$ by the definition of $g$, and since $n^* \in \Delta$, $g(n^*) = \hat{g}(n^*)$. Also, $\hat{g}(v) = \hat{g}(n^*) + w((n^*, v))$, because $P$ is an optimal path. Therefore, $g(v) \leq \hat{g}(v)$. But it is always true that $g(v) \geq \hat{g}(v)$. Therefore, $g(v) = \hat{g}(v)$, and by the definition of $\Delta$, since $v \not \in \Delta$, then $v \in O$. 
+Now, $g(v) \leq g(n^*) + w((n^*, v))$ by the definition of $g$, and since $n^* \in \Delta$, $g(n^*) = \hat{g}(n^*)$. Also, $\hat{g}(v) = \hat{g}(n^*) + w((n^*, v))$, because $P$ is an optimal path. Therefore, $g(v) \leq \hat{g}(v)$. But it is always true that $g(v) \geq \hat{g}(v)$. Therefore, $g(v) = \hat{g}(v)$, and by the definition of $\Delta$, $v \not \in \Delta$ implies $v \in O$.
 \end{proof}
-%TODO prove theorem
 
-%\begin{theorem}[Correctness of the A* algorithm]
-%\label{thm:astar}
-%With an admissible heuristic, A* finds the optimal path between any two given start and goal nodes, if they are connected.
-%\end{theorem}
-%\begin{proof}
-%Note that A* only terminates when exploring the goal node, or when the open set depletes. But the only way 	that the open set could deplete is if there didn't exist a path between the start and goal nodes, in which case they wouldn't be connected. Therefore, the algorithm only terminates when finding the goal node.
-%
-%Let's call the start node $\alpha$, and the goal node $\beta$. Suppose that when the algorithm terminates, the path we found is not optimal. Since the heuristic is admissible, and $\forall u \in V \ \delta(u, u) = 0$, then $h(\beta) = 0$. This means that $f(\beta) = g(\beta) > \delta(\alpha, \beta)$.
-%
-%We know that some node $k \in V$ from the optimal path between $\alpha$ and $\beta$ is in the open set. Otherwise, by the time we explored the goal node, the path returned would be optimal. Since $\beta$ was chosen before $k$ in the priority queue, we know that
-%\[f(k) \ge f(\beta) = g(\beta) > \delta(\alpha, \beta)\]
-%Since $k$ is part of the optimal path, then clearly $g(k) = \delta(\alpha, k)$, and since the heuristic is admissible, $h(k) \le \delta(k, \beta)$. Therefore, $f(k) = g(k) + h(k) \le \delta(\alpha, k) + \delta(k, \beta)$. Again, since $k$ is part of the optimal path, we have $\delta(\alpha, k) + \delta(k, \beta) = \delta(\alpha, \beta)$, so we have
-%\[f(k) \le \delta(\alpha, \beta)\]
-%Combining the two inequalities, we get $\delta(\alpha, \beta) < \delta(\alpha, \beta)$, which is a contradiction.
-%\end{proof}
+\begin{lemma}
+\label{lemma:astar2}
+Suppose the heuristic used by $A^*$ is admissible, and suppose $A^*$ has not terminated. Then, for any optimal path $P$ from $\alpha$ to $\beta$, $\exists v$ in $P$ with $f(v) \leq \hat{f}(\alpha)$.
+\end{lemma}
+\begin{proof}
+By lemma \ref{lemma:astar1}, $\exists v$ in $P$ with $g(v) = \hat{g}(v)$. Therefore, by the definition of the score function and the hypothesis,
+\begin{align*}
+f(v) &= g(v) + h(v)\\
+&= \hat{g}(v) + h(v)\\
+&\leq \hat{g}(v) + \hat{h}(v) = \hat{f}(v)
+\end{align*}
+Since $P$ is an optimal path, $\hat{f}(v) = \hat{f}(\alpha) \  \forall v$ in the path $P$, which proves the lemma.
+\end{proof}
+
+\begin{theorem}[Correctness of $A^*$]
+\label{thm:astar}
+If the heuristic is admissible, then $A^*$ always finds an optimal path between two connected nodes.
+\end{theorem}
+\begin{proof}
+There are only three possible cases in which $A^*$ doesn't find an optimal path: the algorithm terminates at a node which is not the goal, terminates at the goal node but the path found isn't optimal, or fails to terminate at all. Let's consider the three cases separately.
+
+Consider the case where the algorithm terminates at a node which is not the goal. Since we are using the early exit condition, which makes the algorithm terminate whenever it puts the goal node in the closed set, the only possible way that the algorithm terminates without having found the goal node is if the goal node was never in the open set to start with, or equivalently, the goal node is not connected to the start node, which contradicts our hypothesis.
+
+Consider the case where the algorithm terminates at the goal node, but doesn't find an optimal path. Note that since the heuristic is admissible
+\[ 0 \leq h(\beta) \leq \hat{h}(\beta) = 0 \  \Rightarrow \  h(\beta) = 0 \]
+In this case, by the time the algorithm terminates, we have $f(\beta) = g(\beta) > \hat{f}(\alpha)$ because the path found is not optimal. But by lemma \ref{lemma:astar2}, just before termination, there existed a node $u \in O$ on an optimal path with $f(u) \leq \hat{f}(\alpha) < f(\beta)$, and since the algorithm uses a priority queue with the score, the node $u$ would have been selected for expansion instead of $\beta$, and the algorithm wouldn't have terminated.
+
+Finally, consider the case where the algorithm fails to terminate. Remember that in $A^*$ we only work with graphs in which weights are strictly positive. Let 
+\[ \epsilon = \min_{e \in E} w(e) > 0 \]
+For any node $u$ further than $M = \hat{f}(\alpha) / \epsilon$ steps from $\alpha$, we have
+\[ f(u) \geq g(u) \geq \hat{g}(u) > M \epsilon = \hat{f}(\alpha) \]
+By lemma \ref{lemma:astar2}, we see that there is a node $v \in O$ on an optimal path such that $f(v) \leq \hat{f}(\alpha) < f(u)$, so the algorithm will always pick it first, and therefore no nodes further than $M$ steps from $\alpha$ are ever explored.
+
+Then, the only reason why the algorithm never terminates is because it's trapped in a loop where it repeatedly explores nodes that are less than $M$ steps away from $\alpha$. Let $V_M$ be the set of nodes accessible within $M$ or less steps from $\alpha$. Consider any node $u \in V_M$. There are only a finite number of paths from $\alpha$ to $u$ that only pass through nodes in $V_M$, and therefore $u$ can only be explored a finite number of times. We call this number $m_u$. Let
+\[ m = \max_{u \in V_M} m_u \]
+which is the maximum number of times any node can be explored. Then, after at most $|V_M| \cdot m$ expansions, all nodes in $V_M$ will be in the closed set. But we've seen that no nodes outside $V_M$ can be explored. Therefore, $A^*$ must terminate.
+\end{proof}
 
 We can see that if the heuristic overestimates the true distance of the optimal path, the algorithm is not guaranteed to find an optimal path, by using a counterexample. %TODO show figure with counterexample
 
@@ -468,10 +491,10 @@ In figure FIGURE we can see a comparison of the number of nodes explored using a
 \chapter{Heuristics}
 Maybe a short chapter about heuristics?
 
-\chapter{A* variants}
+\chapter{$A^*$ variants}
 
-\section{IDA*}
-Iterative Deepening A*, or \textbf{IDA*}, is a variant of A* based on iterative deepening search. 
+\section{$IDA^*$}
+Iterative Deepening $A^*$, or $\bm{IDA^*}$, is a variant of $A^*$ based on iterative deepening search. 
 
 
 \end{document}
