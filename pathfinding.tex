@@ -57,12 +57,15 @@ A \textbf{weighted directed graph} is a graph in which $\forall e \in E \ \exist
 If $e = (u, v)$ for some $u, v \in V$, then we equivalently call $d(u, v) = w(e)$ the \textbf{distance} from $u$ to $v$.
 \end{definition}
 
+From now on, when we talk about a graph, we will implicitly refer to a weighted directed graph, since it's the most general type of graph we will work with. An unweighted graph can be thought of as a weighted graph where all weights are equal to one, and an undirected graph as a directed graph where $\forall (u, v) \in E,\  \exists (v, u) \in E$.
+
 \begin{definition}[Path]
 Given a graph $G$, and $u, v \in V$, a \textbf{path} $P$ between $u$ and $v$ is an ordered list of a certain amount of edges, $N$, in the form
 
 \[ P = \{(u,v_1), (v_1, v_2), \dots, (v_{N-2}, v_{N-1}), (v_{N-1}, v)\} \]
 
 \end{definition}
+
 Note that paths are not unique. There may exist multiple paths between two nodes.
 
 \begin{definition}
@@ -86,12 +89,14 @@ If $P$ is a path between $u$ and $v$, we can equivalently write
 If the context is clear, we will just write $d(u, v)$. For convenience, if $u$ and $v$ are not connected, we define the distance between them as $d(u, v) = \infty$.
 \end{definition}
 
+Note that, in general, $d(u, v) \neq d(v, u)$, since graphs can be directed and not all paths may be reversible.
+
 \begin{definition}[Optimal path]
 \label{def:optimal}
 Given a set of all the existing paths between two nodes $u$ and $v$, $X_{(u, v)}$, we will say that a path $P \in X_{(u,v)}$ is \textbf{optimal} if and only if $d(P) \le d(P') \ \forall P' \in X_{(u, v)}$.
 \end{definition}
 
-We will also say that P is the \textbf{shortest distance path} if it is optimal, and we will write the distance that fulfills the condition in definition \ref{def:optimal} as $\delta(u,v)$.
+We will also say that P is the \textbf{shortest distance path} if it is optimal, and we will write the distance that fulfils the condition in definition \ref{def:optimal} as $\delta(u,v)$.
 
 
 Instead of presenting the A* algorithm without any background, we will first briefly discuss some other widely known algorithms that can be used to find paths between nodes in graphs, and build up to the main algorithm by trying to gradually improve the performance.
@@ -349,7 +354,7 @@ In Dijkstra, we used the actual distances of the paths between nodes for the pri
 \section{A*}
 As we have seen, Dijkstra always gives us optimal paths, but it wastes a lot of time exploring a lot of nodes that are not in a promising direction. On the other hand, Greedy Best-First Search explores nodes in a promising direction, but does not produce optimal paths reliably.
 
-The A* algorithm is a combination of both algorithms. It takes into account both the actual distance from the source to a node, and the estimated distance from the node to the goal.
+The A* algorithm is a combination of both algorithms. It takes into account both the actual distance from the source to a node, and the estimated distance from the node to the goal. Like Dijkstra's algorithm, it works only for positive weights.
 
 \begin{definition}
 Given a source and goal nodes in a graph $G = (V, E)$, we define the \textbf{score} as the application
