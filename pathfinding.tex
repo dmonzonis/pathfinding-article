@@ -368,14 +368,6 @@ We will call $g$ the \textbf{g-score}, and $h$ the \textbf{h-score}.
 
 When a node is explored, its g- score, and thus its score will be updated. The pseudocode for the algorithm is shown in algorithm \ref{alg:astar}. As we can see, it's very similar to Dijkstra's, except that we now use the score for the priority queue ordering, instead of just the distance to that node.
 
-This new algorithm is faster than Dijkstra, but it only finds optimal paths within a certain condition, which is what we will prove next.
-
-\begin{definition}
-A heuristic function $h$ is said to be \textbf{admissible} if, $\forall u \in V$, $h(u)$ never overestimates the real cost of moving from $u$ to the goal, that is, if $P_u$ is an optimal path from $u$ to the goal, then $\forall u \in V \ h(u) \le d(P_u)$.
-\end{definition}
-
-
-
 \begin{algorithm}
 \caption{A* algorithm}
 \label{alg:astar}
@@ -416,11 +408,43 @@ A heuristic function $h$ is said to be \textbf{admissible} if, $\forall u \in V$
 \end{algorithmic}
 \end{algorithm}
 
+This new algorithm is faster than Dijkstra, but it only finds optimal paths within a certain condition, which is what we will prove next.
+
+\begin{definition}
+A heuristic function $h$ is said to be \textbf{admissible} if, $\forall u \in V$, $h(u)$ never overestimates the real cost of moving from $u$ to the goal, that is, given a goal node $v \in G$, then $\forall u \in V \ h(u) \le \delta(u, v)$.
+\end{definition}
+
+%TODO Write proof similar to Dijkstra's
+\begin{theorem}[Correctness of the A* algorithm]
+\label{thm:astar}
+With an admissible heuristic, A* finds the optimal path between any two given start and goal nodes, if they are connected.
+\end{theorem}
+\begin{proof}
+Note that A* only terminates when exploring the goal node, or when the open set depletes. But the only way 	that the open set could deplete is if there didn't exist a path between the start and goal nodes, in which case they wouldn't be connected. Therefore, the algorithm only terminates when finding the goal node.
+
+Let's call the start node $\alpha$, and the goal node $\beta$. Suppose that when the algorithm terminates, the path we found is not optimal. Since the heuristic is admissible, and $\forall u \in V \ \delta(u, u) = 0$, then $h(\beta) = 0$. This means that $f(\beta) = g(\beta) > \delta(\alpha, \beta)$.
+
+We know that some node $k \in V$ from the optimal path between $\alpha$ and $\beta$ is in the open set. Otherwise, by the time we explored the goal node, the path returned would be optimal. Since $\beta$ was chosen before $k$ in the priority queue, we know that
+\[f(k) \ge f(\beta) = g(\beta) > \delta(\alpha, \beta)\]
+Since $k$ is part of the optimal path, then clearly $g(k) = \delta(\alpha, k)$, and since the heuristic is admissible, $h(k) \le \delta(k, \beta)$. Therefore, $f(k) = g(k) + h(k) \le \delta(\alpha, k) + \delta(k, \beta)$. Again, since $k$ is part of the optimal path, we have $\delta(\alpha, k) + \delta(k, \beta) = \delta(\alpha, \beta)$, so we have
+\[f(k) \le \delta(\alpha, \beta)\]
+Combining the two inequalities, we get $\delta(\alpha, \beta) < \delta(\alpha, \beta)$, which is a contradiction.
+\end{proof}
+
+We can see that if the heuristic overestimates the true distance of the optimal path, the algorithm is not guaranteed to find an optimal path, by using a counterexample. %TODO show figure with counterexample
+
+%TODO insert figure
+In figure FIGURE we can see a comparison of the number of nodes explored using algorithms \ref{alg:dijkstra}, \ref{alg:greedy} and \ref{alg:astar} in a single example.
+
+
 
 \chapter{Heuristics}
 Maybe a short chapter about heuristics?
 
 \chapter{A* variants}
-Explain in detail some of the A* variants and how they improve the original algorithm.
+
+\section{IDA*}
+Iterative Deepening A*, or \textbf{IDA*}, is a variant of A* based on iterative deepening search. 
+
 
 \end{document}
