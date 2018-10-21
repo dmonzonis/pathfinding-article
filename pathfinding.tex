@@ -488,7 +488,24 @@ Then, the only reason why the algorithm never terminates is because it's trapped
 which is the maximum number of times any node can be explored. Then, after at most $|V_M| \cdot m$ expansions, all nodes in $V_M$ will be in the closed set. But we've seen that no nodes outside $V_M$ can be explored. Therefore, $A^*$ must terminate.
 \end{proof}
 
-We can see that if the heuristic overestimates the true distance of the optimal path, the algorithm is not guaranteed to find an optimal path, by using a counterexample. %TODO show figure with counterexample
+%TODO reference manhattan distance which will be defined in a future chapter
+In figure \ref{fig:counterexample:admissible} we see a counterexample of how the converse is not true in general. Here, we are using the Manhattan distance as heuristic, which is an inadmissible heuristic if diagonal movement is allowed, since it will overestimate the true optimal distance between nodes. We can see that $A^*$ finds a path with distance $23$, which is not optimal because, in the same circumstances, Dijkstra finds a path with distance $16$.
+
+\begin{figure}
+\centering
+\begin{subfigure}[b]{0.65\textwidth}
+	\includegraphics[width=1\linewidth]{astar-fail}
+	\caption{$A^*$}
+	\label{subfigure:astar}
+\end{subfigure}
+\begin{subfigure}[b]{0.65\textwidth}
+	\includegraphics[width=1\linewidth]{astar-fail-dijkstra}
+	\caption{Dijkstra}
+	\label{subfigure:dijsktra}
+\end{subfigure}
+\caption{Pathfinding algorithms executed with diagonal movement allowed, and in the case of $A^*$, using the Manhattan distance as heuristic}
+\label{fig:counterexample:admissible}
+\end{figure}
 
 %TODO insert figure
 In figure FIGURE we can see a comparison of the number of nodes explored using algorithms \ref{alg:dijkstra}, \ref{alg:greedy} and \ref{alg:astar} in a single example.
