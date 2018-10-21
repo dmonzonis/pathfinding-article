@@ -503,19 +503,34 @@ In figure \ref{fig:counterexample:admissible} we see a counterexample of how the
 \begin{subfigure}[b]{0.65\textwidth}
 	\includegraphics[width=1\linewidth]{astar-fail}
 	\caption{$A^*$}
-	\label{subfigure:astar}
 \end{subfigure}
 \begin{subfigure}[b]{0.65\textwidth}
 	\includegraphics[width=1\linewidth]{astar-fail-dijkstra}
 	\caption{Dijkstra}
-	\label{subfigure:dijsktra}
 \end{subfigure}
 \caption{Pathfinding algorithms executed with diagonal movement allowed, and in the case of $A^*$, using the Manhattan distance as heuristic}
 \label{fig:counterexample:admissible}
 \end{figure}
 
-%TODO insert figure
-In figure FIGURE we can see a comparison of the number of nodes explored using algorithms \ref{alg:dijkstra}, \ref{alg:greedy} and \ref{alg:astar} in a single example. For algorithms \ref{alg:greedy} and \ref{alg:astar}, we have used the Manhattan distance as heuristic.
+In figure \ref{fig:node-expansion} we can see a visual comparison of the number of nodes explored using algorithms \ref{alg:dijkstra}, \ref{alg:greedy} and \ref{alg:astar} in a single example. For algorithms \ref{alg:greedy} and \ref{alg:astar}, we have used the Manhattan distance as heuristic. We can see that Dijkstra explores many more nodes than the other two (it explores even more nodes that didn't fit in the image), while Greedy Best-First Search explores many fewer nodes but the path it finds isn't optimal, since the distance of the path it calculates is $35$, while Dijkstra and $A^*$ find paths of distance $33$.
+
+\begin{figure}
+\centering
+\begin{subfigure}[b]{0.45\textwidth}
+	\includegraphics[width=1\linewidth]{astar-nodes}
+	\caption{$A^*$}
+\end{subfigure}
+\begin{subfigure}[b]{0.45\textwidth}
+	\includegraphics[width=1\linewidth]{dijkstra-nodes}
+	\caption{Dijkstra}
+\end{subfigure}
+\begin{subfigure}[b]{0.45\textwidth}
+	\includegraphics[width=1\linewidth]{greedy-nodes}
+	\caption{Greedy Best-First Search}
+\end{subfigure}
+\caption{Pathfinding algorithms executed with diagonal movement allowed, and in the case of $A^*$, using the Manhattan distance as heuristic}
+\label{fig:node-expansion}
+\end{figure}
 
 \chapter{Heuristics}
 In the previous chapter we have proved that as long as the heuristic is admissible, $A^*$ produces optimal paths. But not any admissible heuristic will give us the same performance. Take $h(u) = 0 \  \forall u \in V$ for example, which is always admissible, and the algorithm becomes equivalent to Dijkstra, as we can see in algorithm \ref{alg:dijkstra}. We see then that $A^*$ is actually a class of algorithms, and by selecting the g-score and h-score functions we select one of the algorithms from the class. We normally only change the h-score, and use the g-score defined previously, but notice how if we make $g(u) = 0 \  \forall u \in V$, then we get another subclass of algorithms depending on the h-score which are equivalent to the Greedy Best-First Search algorithm seen in section \ref{section:greedy}. Nonetheless, when talk about $A^*$, we will usually refer to one of the algorithms in the class, after selecting an heuristic.
@@ -585,8 +600,7 @@ The heuristic is clearly admissible, since $h(A) \leq \hat{h}(A) = 4$, $h(B) \le
 
 We will prove that with a consistent heuristic, $A^*$ is optimal. By proposition \ref{prop:consistent} we see that consistency is a stronger condition than admissibility, and therefore by theorem \ref{thm:astar}, the algorithm will still find optimal paths.
 
-
-
+%TODO make proof of optimality
 
 \chapter{$A^*$ variants}
 
