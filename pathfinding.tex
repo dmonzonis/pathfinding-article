@@ -305,6 +305,7 @@ With early exit, when we explore node $v$ we will end the execution of the algor
 Note that Dijkstra's algorithm only works for graphs with positive weights. For graphs with negative weights, there are other less efficient algorithms which also find optimal paths, like the Bellman-Ford algorithm.
 
 \section{Greedy Best-First search}
+\label{section:greedy}
 As we have seen in the last section, we now have an algorithm that can find the optimal path between any two nodes in a graph with positive weights. We will now start to worry about improving the performance of the algorithms.
 
 Let's forget about optimality for a while, and modify our pathfinding algorithm to use only an heuristic. An heuristic is a function
@@ -363,7 +364,7 @@ As we have seen, Dijkstra always gives us optimal paths, but it wastes a lot of 
 
 The $A^*$ algorithm is a combination of both algorithms. It takes into account both the actual distance from the source to a node, and the estimated distance from the node to the goal. Unlike Dijkstra's algorithm, which works for positive weights, $A^*$ only works with strictly positive weights.
 
-Given two connected nodes $\alpha, \beta \in V$, consider the optimal path between $alpha$ and $beta$, $P$. For any node $u$ that is part of $P$, we define a function $\hat{f}(u) = \hat{g}(u) + \hat{h}(u)$, where $\hat{g}(u) = \delta(\alpha, u)$ and $\hat{h}(u) = \delta(u, \beta)$. Note that for any other node $v$ in the optimal path $P$, $\hat{f}(u) = \hat{f}(v)$.
+Given two connected nodes $\alpha, \beta \in V$, consider the optimal path between $\alpha$ and $\beta$, $P$. For any node $u$ that is part of $P$, we define a function $\hat{f}(u) = \hat{g}(u) + \hat{h}(u)$, where $\hat{g}(u) = \delta(\alpha, u)$ and $\hat{h}(u) = \delta(u, \beta)$. Note that for any other node $v$ in the optimal path $P$, $\hat{f}(u) = \hat{f}(v)$.
 
 Now suppose we have functions $g(u)$ and $h(u)$ which give us estimates for $\hat{g}(u)$ and $\hat{h}(u)$ respectively.
 
@@ -425,7 +426,7 @@ When a node is explored, its g-score, and thus its score will be updated. The ps
 This new algorithm is faster than Dijkstra, but it only finds optimal paths within a certain condition, which is what we will prove next.
 
 \begin{definition}
-A heuristic function $h$ is said to be \textbf{admissible} if, $\forall u \in V$, $h(u)$ never overestimates the real cost of moving from $u$ to the goal, that is, given a goal node $v \in V$, then $\forall u \in V \ h(u) \le \hat{h}(u) = \delta(u, v)$.
+A heuristic $h$ is said to be \textbf{admissible} if and only if, $\forall u \in V$, $h(u)$ never overestimates the real cost of moving from $u$ to the goal, that is, given a goal node $v \in V$, then $\forall u \in V \ h(u) \le \hat{h}(u) = \delta(u, v)$.
 \end{definition}
 
 We will prove that, with the score function we have constructed, $A^*$ finds optimal paths as long as the heuristic is admissible. Consider a graph $G = (V, E)$, a source node $\alpha$ and a goal node $\beta$, such that $\alpha$ and $\beta$ are connected. Consider the closed set $S$, which corresponds to the set of visited nodes in the algorithm, and the open set $O$, which are the nodes that haven't been explored yet.
@@ -444,7 +445,7 @@ Now suppose $\alpha \in S$. Let
 \[ \Delta = \{ n \in S \  | \  n \text{ is part of } P,\  g(n) = \hat{g}(n) \} \]
 $\Delta$ is clearly not empty since $\alpha \in \Delta$.
 
-Let $n^* \in \Delta$ be the node that satisfies $d_P(\alpha, n^*) \leq d_P(\alpha, n) \  \forall n \in \Delta$. Since $w(e) > 0\  \forall e \in E$, $n^*$ is unique. Also, $n^* \neq u$ since $u \not \in S$. Let $v$ be the node in $P$ which comes after $n^*$, that is, $(n^*, v) \in P$. Note that it's possible that $v = u$.
+Let $n^* \in \Delta$ be the node that satisfies $d_P(\alpha, n^*) \leq d_P(\alpha, n) \  \forall n \in \Delta$. Since $w(e) > 0\  \forall e \in E$, $n^*$ is unique. Also, $n^* \neq u$ since $u \not \in S$. Let $v$ be the successor of $n^*$ in $P$. Note that it's possible that $v = u$.
 
 Now, $g(v) \leq g(n^*) + w((n^*, v))$ by the definition of $g$, and since $n^* \in \Delta$, $g(n^*) = \hat{g}(n^*)$. Also, $\hat{g}(v) = \hat{g}(n^*) + w((n^*, v))$, because $P$ is an optimal path. Therefore, $g(v) \leq \hat{g}(v)$. But it is always true that $g(v) \geq \hat{g}(v)$. Therefore, $g(v) = \hat{g}(v)$, and by the definition of $\Delta$, $v \not \in \Delta$ implies $v \in O$.
 \end{proof}
