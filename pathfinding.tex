@@ -61,7 +61,7 @@ A \textbf{weighted directed graph} is a graph in which $\forall e \in E \ \exist
 If $e = (u, v)$ for some $u, v \in V$, then we equivalently call $d(u, v) = w(e)$ the \textbf{distance} from $u$ to $v$.
 \end{definition}
 
-From now on, when we talk about a graph, we will implicitly refer to a weighted directed graph, since it's the most general type of graph we will work with. An unweighted graph can be thought of as a weighted graph where all weights are equal to one, and an undirected graph as a directed graph where $\forall (u, v) \in E,\  \exists (v, u) \in E$.
+From now on, when we talk about a graph, we will implicitly refer to a finite weighted directed graph, since it's the most general type of graph we will work with. An unweighted graph can be thought of as a weighted graph where all weights are equal to one, and an undirected graph as a directed graph where $\forall (u, v) \in E,\  \exists (v, u) \in E$. Also, the graphs we will work with are finite, meaning that $|V| < \infty$ and $|E| < \infty$.
 
 \begin{definition}[Path]
 Given a graph $G$, and $u, v \in V$, a \textbf{path} $P$ between $u$ and $v$ is an ordered list of a certain amount of edges, $N$, in the form
@@ -74,6 +74,10 @@ Note that paths are not unique. There may exist multiple paths between two nodes
 
 \begin{definition}
 We say that two nodes $u, v \in V$ are connected $\Longleftrightarrow$ There exists a path $P$ between $u$ and $v$.
+\end{definition}
+
+\begin{definition}
+Given a path $P$ between two nodes $u, v \in V$, given a node $n$ which is in the path, we say that $n'$ is the \textbf{successor} of $n$ if $(n, n') \in P$, that is, if we followed the path $P$, the next node we would visit when we have reached $n$ would be $n'$.
 \end{definition}
 
 \begin{definition}
@@ -97,11 +101,10 @@ Note that, in general, $d(u, v) \neq d(v, u)$, since graphs can be directed and 
 
 \begin{definition}[Optimal path]
 \label{def:optimal}
-Given a set of all the existing paths between two nodes $u$ and $v$, $X_{(u, v)}$, we will say that a path $P \in X_{(u,v)}$ is \textbf{optimal} if and only if $d(P) \le d(P') \ \forall P' \in X_{(u, v)}$.
+Given a set of all the existing paths between two nodes $u$ and $v$, $\chi_{(u, v)}$, we will say that a path $P \in \chi_{(u,v)}$ is \textbf{optimal} if and only if $d(P) \le d(P') \ \forall P' \in \chi_{(u, v)}$.
 \end{definition}
 
-We will also say that P is the \textbf{shortest distance path} if it is optimal, and we will write the distance that fulfils the condition in definition \ref{def:optimal} as $\delta(u,v)$.
-
+We will also say that $P$ is the \textbf{shortest distance path} if it is optimal, and we will write the distance that fulfils the condition in definition \ref{def:optimal} as $\delta(u,v)$. Clearly, in a finite graph, an optimal path between any two nodes always exists, since in this case $\chi_{(u, v)}$ is finite.
 
 Instead of presenting the $A^*$ algorithm without any background, we will first briefly discuss some other widely known algorithms that can be used to find paths between nodes in graphs, and build up to the main algorithm by trying to gradually improve the performance.
 
