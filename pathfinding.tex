@@ -200,11 +200,18 @@ We see that with this version of BFS, all nodes in the connected component of th
 \end{algorithmic}
 \end{algorithm}
 
-Note that, even though BFS will always find a path between two nodes if they are connected, the path produced is not optimal when we consider weights. The path found will be the shortest in terms of the number of steps, but when taking into account the weights of the edges, this algorithm will not give us the shortest distance path.
+Note that, even though BFS will always find a path between two nodes if they are connected, the path produced is not optimal when we consider weights. The path found will be the shortest in terms of the number of steps, but when taking into account the weights of the edges, this algorithm will not give us the shortest distance path, as we can see in figure \ref{fig:bfs-fail}.
 
 %TODO Put example images
+\begin{figure}
+\centering
+\includegraphics[width=1\linewidth]{bfs-fail}
+\caption{An example on how BFS fails to find an optimal path when we use a weighted graph. In this example, moving to a white tile has cost 1, while moving to a gray tile has cost 10, so clearly, going in a straight line is not the optimal path.}
+\label{fig:bfs-fail}
+\end{figure}
 
-On  the other hand, the algorithm doesn't seem very efficient, since we can potentially explore lots of nodes on a very dense graph.
+
+Also, the algorithm doesn't seem very efficient, since we can potentially explore lots of nodes on a very dense graph.
 
 We will first address the optimality problem in the next algorithm, and then we will focus on efficiency.
 
