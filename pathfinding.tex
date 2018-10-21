@@ -7,6 +7,8 @@
 \usepackage{algpseudocode}  					% For pseudocode
 \usepackage{hyperref}						% Adds hyperlinks
 \usepackage{bm}								% Bold math
+\usepackage{tikz}							% Graph drawing
+\usepackage{subcaption}						% Subfigures
 
 % Add spacing between theorems, which is zeroed by parskip
 \makeatletter
@@ -23,6 +25,7 @@
 % Theorem keyword definitions
 \newtheorem{theorem}{Theorem}[chapter]
 \newtheorem{definition}[theorem]{Definition}
+\newtheorem{proposition}[theorem]{Proposition}
 \newtheorem{lemma}[theorem]{Lemma}
 \newtheorem{corollary}[theorem]{Corollary}
 
@@ -41,7 +44,7 @@ Abstract goes here.
 \tableofcontents
 
 \chapter{Introduction}
-Many problems in the fields of science, mathematics and engineering can be generalised to the problem of finding a path in a graph. Some examples of such problems are routing of telephone or Internet traffic, GPS routing, layout of printed circuit boards, automated theorem proving, and artificial intelligence in games and robotics. In this article, we will provide a mathematical and applied approach to this problem.
+Many problems in the fields of science, mathematics and engineering can be generalised to the problem of finding a path in a graph. Examples of such problems include routing of telephone or Internet traffic, layout of printed circuit boards, automated theorem proving, GPS routing, decision making in artificial intelligence and robotics. In this article, we will provide a mathematical and applied approach to this problem.
 
 For most of the examples in the article we will be using a grid graph, represented by a tiled 2D map, in which each tile (or node) is connected to its adjacent tiles. In the map, each tile can have a different weight, or be a wall, which is impassable. This notion of weighted nodes and walls can be translated to the structure of a weighted directed graph by thinking of the weights of the tiles as the weights of the edges that connect adjacent tiles to it. Walls can be thought of as nodes that are not connected (or just non-existent) to any other node, and therefore not reachable from other nodes. A pathfinding simulator was built for this article to help illustrate these examples.
 
