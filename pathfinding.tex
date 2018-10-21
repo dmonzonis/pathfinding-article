@@ -508,17 +508,85 @@ In figure \ref{fig:counterexample:admissible} we see a counterexample of how the
 \end{figure}
 
 %TODO insert figure
-In figure FIGURE we can see a comparison of the number of nodes explored using algorithms \ref{alg:dijkstra}, \ref{alg:greedy} and \ref{alg:astar} in a single example.
-
-
+In figure FIGURE we can see a comparison of the number of nodes explored using algorithms \ref{alg:dijkstra}, \ref{alg:greedy} and \ref{alg:astar} in a single example. For algorithms \ref{alg:greedy} and \ref{alg:astar}, we have used the Manhattan distance as heuristic.
 
 \chapter{Heuristics}
-Maybe a short chapter about heuristics?
+In the previous chapter we have proved that as long as the heuristic is admissible, $A^*$ produces optimal paths. But not any admissible heuristic will give us the same performance. Take $h(u) = 0 \  \forall u \in V$ for example, which is always admissible, and the algorithm becomes equivalent to Dijkstra, as we can see in algorithm \ref{alg:dijkstra}. We see then that $A^*$ is actually a class of algorithms, and by selecting the g-score and h-score functions we select one of the algorithms from the class. We normally only change the h-score, and use the g-score defined previously, but notice how if we make $g(u) = 0 \  \forall u \in V$, then we get another subclass of algorithms depending on the h-score which are equivalent to the Greedy Best-First Search algorithm seen in section \ref{section:greedy}. Nonetheless, when talk about $A^*$, we will usually refer to one of the algorithms in the class, after selecting an heuristic.
+
+In this chapter, we will see that there exists an admissible heuristic which also makes $A^*$ optimal, meaning that no other pathfinding algorithm which produces optimal paths will expand fewer nodes. In practice, however, finding this perfect heuristic is often hard, but if we have enough information to constrain the set of accessible nodes 
+
+\section{Consistent heuristics}
+
+\begin{definition}
+Given two pathfinding algorithms $A$ and $B$, we say that $A$ \textbf{dominates} $B$ if and only if both algorithms find optimal paths but the set of nodes that $A$ expands is a subset of the set of nodes that $B$ expands.
+\end{definition}
+
+\begin{definition}
+Given two pathfinding algorithms $A$ and $B$, we say that $A$ \textbf{strictly dominates} $B$ if and only if $A$ dominates $B$ and $B$ does not dominate $A$.
+\end{definition}
+
+\begin{definition}
+Given a class of algorithms $\bar{A}$, we say that $A \in \bar{A}$ is \textbf{optimal} if and only if $A$ dominates every member of $\bar{A}$.
+\end{definition}
+
+\begin{definition}
+A heuristic $h$ is said to be \textbf{consistent} or monotone if and only if, $\forall u, v \in V$ satisfy
+\[ h(u) \leq \delta(u, v) + h(v) \]
+which is a form of the more general triangle inequality, and it also satisfies $h(\beta) = 0$ where $\beta$ is the goal node.
+\end{definition}
+
+\begin{proposition}
+\label{prop:consistent}
+Given an heuristic $h$,
+\[ h \text{ is consistent} \Rightarrow h \text{ is admissible} \]
+\end{proposition}
+\begin{proof}
+Let $\beta \in V$ be the goal node of the heuristic $h$. We will prove that $\forall u \in C_\beta$, $h(u) \leq \hat{h}(u)$, by induction on the number of steps from $u$ to the goal in an optimal path $P$.
+
+Let $u \in C_\beta$, and let $P$ be an optimal path from $u$ to $\beta$. If there are 0 steps from $u$ to $\beta$ in $P$, then $u = \beta$, and $h(u) = h(\beta) = 0 \leq \hat{h}(u) = 0$.
+
+Now suppose that $u$ is $k > 0$ steps away from $\beta$ in $P$. Let $v$ be the successor of $u$ in $P$, which is $k-1$ steps away from $\beta$. Therefore, since $h$ is consistent,
+\[ h(u) \leq \delta(u, v) + h(v) \]
+But by our inductive hypothesis, $h(v) \leq \hat{h}(v)$, and therefore
+\[ h(u) \leq \delta(u, v) + \hat{h}(v) = \hat{h}(u) \]
+since $P$ is an optimal path.
+\end{proof}
+
+The converse is not true in general, although in practice it can be difficult to find an admissible heuristic that is not also consistent. We will show this with a counterexample. Take the graph from figure \ref{fig:heuristic}, and let $C$ be the goal node. Let's define the heuristic as
+\begin{align*}
+h(A) &= 4\\
+h(B) &= 1\\
+h(C) &= 0
+\end{align*}
+The heuristic is clearly admissible, since $h(A) \leq \hat{h}(A) = 4$, $h(B) \leq \hat{h}(B) = 3$, and $h(C) \leq \hat{h}(C) = 0$. But it is not consistent, since $h(A) > \delta(A, B) + h(B) = 1 + 1 = 2$.
+
+\begin{figure}
+\centering
+\begin{tikzpicture}
+	[scale=.8, auto, node_style/.style={circle, draw=blue, fill=blue!20},
+	edge_style/.style={draw=black, ultra thick}]
+	\node[node_style] (n1) at (-5,0) {A};
+  	\node[node_style] (n2) at (0,0) {B};
+  	\node[node_style] (n3) at (5,0) {C};
+  	
+  	\draw[edge_style] (n1) edge node{1} (n2);
+  	\draw[edge_style] (n2) edge node{3} (n3);
+\end{tikzpicture}
+\caption{A weighted undirected graph.}
+\label{fig:heuristic}
+\end{figure}
+
+We will prove that with a consistent heuristic, $A^*$ is optimal. By proposition \ref{prop:consistent} we see that consistency is a stronger condition than admissibility, and therefore by theorem \ref{thm:astar}, the algorithm will still find optimal paths.
+
+
+
 
 \chapter{$A^*$ variants}
 
 \section{$IDA^*$}
-Iterative Deepening $A^*$, or $\bm{IDA^*}$, is a variant of $A^*$ based on iterative deepening search. 
+Iterative Deepening $A^*$, or $\bm{IDA^*}$, is a variant of $A^*$ based on iterative deepening search, which is a modification of Depth-First Search that finds the best depth limit. %TODO talk about DFS in the annex
 
+
+%TODO make chapter on tie-breaking rules
 
 \end{document}
