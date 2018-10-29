@@ -603,9 +603,76 @@ The heuristic is clearly admissible, since $h(A) \leq \hat{h}(A) = 4$, $h(B) \le
 \label{fig:heuristic}
 \end{figure}
 
-We will prove that with a consistent heuristic, $A^*$ is optimal. By proposition \ref{prop:consistent} we see that consistency is a stronger condition than admissibility, and therefore by theorem \ref{thm:astar}, the algorithm will still find optimal paths.
+%We will prove that with a consistent heuristic, $A^*$ is optimal. By proposition \ref{prop:consistent} we see that consistency is a stronger condition than admissibility, and therefore by theorem \ref{thm:astar}, the algorithm will still find optimal paths. But first, we need some preliminary results that will be used in the proof.
+The following proposition is of special interest, since it will allow us to implement $A^*$ without having to re-open closed nodes.
+
+\begin{proposition}
+\label{prop:heur1}
+With a consistent heuristic, any closed node $u$ in the $A^*$ algorithm satisfies
+\[ g(u) = \hat{g}(u) \]
+\end{proposition}
+\begin{proof}
+Remember that our definition of the g-score implied $g(v) \geq \hat{g}(v) \ \forall v \in V$.
+
+Consider the state just before closing a node $u$, and suppose $g(u) > \hat{g}(u)$. Since $u$ is about to be closed, it means it's connected to the source node $\alpha$, and therefore an optimal path $P$ exists between $\alpha$ and $u$. Since $g(u) > \hat{g}(u)$, the algorithm hasn't found $P$ or any other optimal path. Since it did not find $P$, by Lemma \ref{lemma:astar1},
+\[ \exists v \in O \mid g(v) = \hat{g}(v) \]
+and such that $v$ is part of $P$.
+
+If $u = v$, then the proof is finished. Suppose $u \neq v$. Then, we have
+\[ \hat{g}(u) = \hat{g}(v) + \delta(v, u) = g(v) + \delta(v, u) \]
+since $P$ is an optimal path from $\alpha$ to $u$, and $v$ is part of $P$. Then, by our supposition,
+\[ g(u) > g(v) + \delta(v, u) \]
+Adding the $h(u)$ to both sides,
+\[ g(u) + h(u) > g(v) + \delta(v, u) + h(u) \geq g(v) + h(v) \]
+where in the second inequality we have used equation \ref{eq:consistency}.
+
+Note that this result is equivalent to
+\[ f(u) > f(v) \]
+which contradicts the fact that $u$ was selected for expansion, when $v$ was available and should have been picked first by the algorithm.
+\end{proof}
+
+\begin{lemma}
+\label{lemma:heur2}
+Consider the ordered set of the nodes closed by $A^*$, 
+\[ \{ \alpha = n1, n2, \dots, n_m \} \]
+ordered by the time they were closed by the algorithm. If the heuristic is consistent, then, for $p, q \in \{ 1, \dots, m \}$,
+\[ p \leq q \Rightarrow f(n_p) \leq f(n_q) \]
+\end{lemma}
+\begin{proof}
+Let $u$ be a closed node, and $v$ the node closed just before $u$. Suppose the optimal path $P$ computed by $A^*$ from the source node $\alpha$ to $u$ does not go through $v$. This means that the algorithm selected $v$ for expansion when $u$ was also available, which means $f(v) \leq f(u)$, proving the lemma.
+
+Now suppose that the optimal path to $u$, $P$, does go through $v$. Then, $\hat{g}(u) = \hat{g}(v) + \delta(v, u)$. By Proposition \ref{prop:heur1}, we know that $g(u) = \hat{g}(u)$ and $g(v) = \hat{g}(v)$. Then,
+\begin{align*}
+f(u) &= g(u) + h(u)\\
+&= \hat{g}(u) + h(u)\\
+&= \hat{g}(v) + \delta(v, u) + h(u)\\
+&\geq \hat{g}(v) + h(v)\\
+&= g(v) + h(v) = f(v)
+\end{align*}
+where we have used equation \ref{eq:consistency}.
+
+Since this is valid for any two nodes that are adjacent in the sequence, then we can clearly see by induction that
+\[ p \leq q \Rightarrow f(n_p) \leq f(n_q) \]
+\end{proof}
+
+\section{Optimality of $A^*$}
+Choosing consistent heuristics has a practical benefit. Like we've seen in \ref{prop:heur1}, with a consistent heuristic we can avoid having to re-open nodes which were already closed.
+
+In this section we will prove the optimality 
+
+\begin{proposition}
+Suppose we have an admissible heuristic, and let $\alpha$ be the source node $A^*$. Suppose that $A^*$ has not terminated yet. Then, for every closed node $u$,
+\[ f(u) \leq \hat{f}(\alpha) \]
+\end{proposition}
+\begin{proof}
+If $\beta$ is the goal node, then $u \neq \beta$ since the algorithm has not terminated. By Lemma \ref{lemma:astar2}, at the time time the node $u$ was closed, there existed a node $v \in O$ which is part of an optimal path $P$ from $\alpha$ to $\beta$ such that $f(v) \leq \hat{f}(\alpha)$.
+But since $u$ was closed before $v$, then
+\[ f(u) \leq f(v) \leq \hat{f}(\alpha) \]
+\end{proof}
+
 
 %TODO make proof of optimality
+
 
 \chapter{$A^*$ variants}
 
