@@ -9,6 +9,7 @@
 \usepackage{bm}								% Bold math
 \usepackage{tikz}							% Graph drawing
 \usepackage{subcaption}						% Subfigures
+\usepackage[toc]{appendix}					% Appendices
 
 % Add spacing between theorems, which is zeroed by parskip
 \makeatletter
@@ -83,6 +84,7 @@ Given a path $P$ between two nodes $u, v \in V$, given a node $n$ which is in th
 \begin{definition}
 If $u \in V$, we define the \textbf{connected component} of $u$ as
 \[ C_u = \{ v \in V\ |\ u \ \text{and} \ v \ \text{are connected}\  \} \]
+which is a subgraph of $G$.
 \end{definition}
 
 \begin{definition}[Distance of a path]
@@ -111,7 +113,7 @@ Instead of presenting the $A^*$ algorithm without any background, we will first 
 \section{BFS}
 Breadth-First Search, or BFS for short, attempts to find a path by methodically examining all the neighbours of each node it examines.
 
-The algorithm uses a queue to keep track of the next nodes to examine, adding all unvisited neighbours of a node when it is examined, until the queue is empty. Explored nodes are kept in a set, so that we don't explore the same node twice. The set of nodes that haven't been explored yet is often called the \emph{open set}, and the set of visited nodes the \emph{closed set}.
+The algorithm uses a queue to keep track of the next nodes to examine, adding all unvisited neighbours of a node when it is examined, until the queue is empty. Explored nodes are kept in a set, so that we don't explore the same node twice. The set of nodes that haven't been explored yet is often called the \emph{open set}, and the set of visited nodes the \emph{closed set}. In the same way, nodes in the open set are called \emph{open nodes}, and nodes in the closed set are called \emph{closed nodes}.
 
 The pseudocode for the algorithm is presented in algorithm \ref{alg:bfs}. The algorithm returns a map called \emph{previous}, which maps every node to the node we came from in the path that the algorithm computes. The procedure that we will use to reconstruct the path from this map for all algorithms is presented in algorithm \ref{alg:reconstruct}.
 
@@ -301,9 +303,9 @@ We know that, at the end of Dijkstra's algorithm, we'll have explored all the no
 \end{proof}
 
 Like with BFS, we can modify the algorithm to use early exit to improve performance.
-\begin{lemma}
-Using Dijkstra's algorithm with early exit with start node $u$ and end node $v$ ensures that $d_D(u, v) = \delta(u, v)$.alt
-\end{lemma}
+\begin{proposition}
+Using Dijkstra's algorithm with early exit with start node $u$ and end node $v$ ensures that $d_D(u, v) = \delta(u, v)$.
+\end{proposition}
 \begin{proof}
 With early exit, when we explore node $v$ we will end the execution of the algorithm. Using \ref{lemma:dijkstra}, we know that $d_D(u, v) = \delta(u, v)$, so we already have the optimal path between the two nodes.
 \end{proof}
@@ -376,11 +378,10 @@ Given two connected nodes $\alpha, \beta \in V$, consider the optimal path betwe
 Now suppose we have functions $g(u)$ and $h(u)$ which give us estimates for $\hat{g}(u)$ and $\hat{h}(u)$ respectively.
 
 \begin{definition}
-Given a source and goal nodes in a graph $G = (V, E)$, we define the \textbf{score} as the function
-\begin{align*}
-	f \colon V &\to \mathbb{R}\\
-	u &\mapsto f(u) = g(u) + h(u)
-\end{align*}
+Given a source and goal nodes in a graph $G = (V, E)$, we define the \textbf{score} as a function $f \colon V \to \mathbb{R}$ defined as
+\begin{equation}
+	f(u) = g(u) + h(u)
+\end{equation}
 where $g(u)$ is an estimate of the optimal distance from the source to the node $u$, and $h(u)$ is an estimate of the optimal distance from the node $u$ to the goal.
 We will call $g$ the \textbf{g-score}, and $h$ the \textbf{h-score}.
 \end{definition}
@@ -459,7 +460,7 @@ Now, $g(v) \leq g(n^*) + w((n^*, v))$ by the definition of $g$, and since $n^* \
 
 \begin{lemma}
 \label{lemma:astar2}
-Suppose the heuristic used by $A^*$ is admissible, and suppose $A^*$ has not terminated. Then, for any optimal path $P$ from $\alpha$ to $\beta$, $\exists v$ in $P$ with $f(v) \leq \hat{f}(\alpha)$.
+Suppose the heuristic used by $A^*$ is admissible, and suppose $A^*$ has not terminated. Then, for any optimal path $P$ from $\alpha$ to $\beta$, $\exists v \in O$ which is part of $P$ such that $f(v) \leq \hat{f}(\alpha)$.
 \end{lemma}
 \begin{proof}
 By lemma \ref{lemma:astar1}, $\exists v$ in $P$ with $g(v) = \hat{g}(v)$. Therefore, by the definition of the score function and the hypothesis,
@@ -496,7 +497,7 @@ which is the maximum number of times any node can be explored. Then, after at mo
 \end{proof}
 
 %TODO reference manhattan distance which will be defined in a future chapter
-In figure \ref{fig:counterexample:admissible} we see a counterexample of how the converse is not true in general. Here, we are using the Manhattan distance as heuristic, which is an inadmissible heuristic if diagonal movement is allowed, since it will overestimate the true optimal distance between nodes. We can see that $A^*$ finds a path with distance $23$, which is not optimal because, in the same circumstances, Dijkstra finds a path with distance $16$.
+In figure \ref{fig:counterexample:admissible} we see a counterexample which proves that the converse is not true in general. Here, we are using the Manhattan distance as heuristic, which is an inadmissible heuristic if diagonal movement is allowed, since it will overestimate the true optimal distance between nodes. We can see that $A^*$ finds a path with distance $23$, which is not optimal because, in the same circumstances, Dijkstra finds a path with distance $16$.
 
 \begin{figure}
 \centering
@@ -508,7 +509,7 @@ In figure \ref{fig:counterexample:admissible} we see a counterexample of how the
 	\includegraphics[width=1\linewidth]{astar-fail-dijkstra}
 	\caption{Dijkstra}
 \end{subfigure}
-\caption{Pathfinding algorithms executed with diagonal movement allowed, and in the case of $A^*$, using the Manhattan distance as heuristic}
+\caption{Pathfinding algorithms executed with diagonal movement allowed, and in the case of $A^*$, using the Manhattan distance as heuristic.}
 \label{fig:counterexample:admissible}
 \end{figure}
 
@@ -528,7 +529,7 @@ In figure \ref{fig:node-expansion} we can see a visual comparison of the number 
 	\includegraphics[width=1\linewidth]{greedy-nodes}
 	\caption{Greedy Best-First Search}
 \end{subfigure}
-\caption{Pathfinding algorithms executed with diagonal movement allowed, and in the case of $A^*$, using the Manhattan distance as heuristic}
+\caption{Pathfinding algorithms executed with diagonal movement allowed, and in the case of $A^*$, using the Manhattan distance as heuristic.}
 \label{fig:node-expansion}
 \end{figure}
 
@@ -552,10 +553,14 @@ Given a class of algorithms $\bar{A}$, we say that $A \in \bar{A}$ is \textbf{op
 \end{definition}
 
 \begin{definition}
-A heuristic $h$ is said to be \textbf{consistent} or monotone if and only if, $\forall u, v \in V$ satisfy
-\[ h(u) \leq \delta(u, v) + h(v) \]
+A heuristic $h$ is said to be \textbf{consistent} or monotone if and only if, $\forall u, v \in V$,
+\begin{equation}
+	h(u) \leq \delta(u, v) + h(v)\label{eq:consistency}
+\end{equation}
 which is a form of the more general triangle inequality, and it also satisfies $h(\beta) = 0$ where $\beta$ is the goal node.
 \end{definition}
+
+Remember that the heuristic defined as $h(u) = 0 \  \forall u \in V$ is admissible. Note that it is also trivially consistent.
 
 \begin{proposition}
 \label{prop:consistent}
@@ -609,5 +614,14 @@ Iterative Deepening $A^*$, or $\bm{IDA^*}$, is a variant of $A^*$ based on itera
 
 
 %TODO make chapter on tie-breaking rules
+
+
+\begin{appendices}
+
+\chapter{Data structures}
+Talk about Queue, PriorityQueue, Map...
+
+
+\end{appendices}
 
 \end{document}
