@@ -399,14 +399,14 @@ When a node is explored, its g-score, and thus its score will be updated. The ps
 \Ensure Given $u \in G$, previous[$u$] gives us the node come from to reach $u$ in the path computed, and g[$u$] is the current g-score of the node
 \State Q $\gets PriorityQueue()$
 \State S $\gets Set()$
-\State g $\gets Map()$
+\State $ g \gets Map()$
 \State previous $\gets Map()$
 \For {u $\in G$}
 	\State g[u] $\gets \infty$
 	\State previous[u] $\gets$ null
 \EndFor
 \State Q.insert((0, $\alpha$))
-\State g[$\alpha$] $\gets 0$
+\State $g[\alpha]$ $\gets 0$
 \While {not Q.empty()}
 	\State u $\gets$ Q.removeMin()
 	\State S.add(u)
@@ -417,9 +417,9 @@ When a node is explored, its g-score, and thus its score will be updated. The ps
 		\If {v $\in S$}
 			\Continue \Comment{Already explored node}
 		\EndIf
-		\State alt $\gets$ g[u] $+ w((u, v))$
-		\If {alt $<$ g[v]}
-			\State g[v] $\gets$ alt \Comment{Update the g-score}
+		\State alt $\gets g[u] + w((u, v))$
+		\If {alt $< g[v]$}
+			\State $g[v] \gets$ alt \Comment{Update the g-score}
 			\State $f = g[v] + h(v)$
 			\State Q.insert((v, f))
 			\State previous[v] $\gets$ u
@@ -712,12 +712,19 @@ We use the following methods from the priority queue:
 \item \emph{empty}: Tells us whether the queue is empty or not. Its complexity is $O(1)$.
 \end{itemize}
 
+We use the priority queue to get the node with minimum score (or distance in the case of Dijkstra, and h-score in the case of Greedy Best-First search) as the next node to be explored and closed. We also use this fact in many of the proofs.
+
+Note that there are other implementations of the priority queue in which insertion is $O(1)$ and removing the item with minimum value is $O(\log n)$, but in the end it doesn't matter which one we use.
 
 \section{Set}
+A set is an unordered list of unique items, but differs in implementation from a regular array, since it's usually implemented using a hash map, so lookup is much faster. We use mainly two operations on the set: the \emph{add} method, which inserts an item into the set, and the \emph{lookup} method (which we represented using mathematical notation in our conditions), which determines whether an item is part of the set or not. Both of these operations have a time complexity of $O(1)$.
 
 \section{Map}
-%TODO Talk about Queue, PriorityQueue, Map...
-
+A map is a structure that stores data in pairs of key and value. Once we have some data in it, we look up using a key, which retrieves its corresponding value. In all of our algorithms, we used maps to store the node we came from for each visited node. In Dijkstra and $A^*$, we also used maps to store the current best distance from the source to each node, or equivalently the g-score. A map has two main methods: one to insert data and one to look up data. We have represented this using square bracket notation:
+\begin{itemize}
+\item To insert or update data in a map $d$, we use $d[key] = value$. If the key did not exist in the map, it will be added with the given value. If the key already existed in the map, its value will be updated to the given value.
+\item To look up data in a map $d$, we use $d[key]$, which would return the value associated to the given key. If the key was not in the map, this operation is illegal and the program should throw an error. In our case, we always initialize the maps at the beginning of the algorithms, so we can never run into this kind of problem.
+\end{itemize}
 
 \end{appendices}
 
