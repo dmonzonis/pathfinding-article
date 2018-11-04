@@ -725,6 +725,7 @@ A map is a structure that stores data in pairs of key and value. Once we have so
 \item To insert or update data in a map $d$, we use $d[key] = value$. If the key did not exist in the map, it will be added with the given value. If the key already existed in the map, its value will be updated to the given value.
 \item To look up data in a map $d$, we use $d[key]$, which would return the value associated to the given key. If the key was not in the map, this operation is illegal and the program should throw an error. In our case, we always initialize the maps at the beginning of the algorithms, so we can never run into this kind of problem.
 \end{itemize}
+Inserting and looking up data in a map has a time complexity of $O(1)$.
 
 \end{appendices}
 
