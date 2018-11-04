@@ -686,7 +686,37 @@ Iterative Deepening $A^*$, or $\bm{IDA^*}$, is a variant of $A^*$ based on itera
 \begin{appendices}
 
 \chapter{Data structures}
-Talk about Queue, PriorityQueue, Map...
+
+In this appendix we will briefly explain the data structures we used in our algorithms. We will only explain them on the interface level, and give the complexity of each of its operations. There are many different ways to implement these structures, but the details on the implementation and justification of the complexity are out of the scope of this article, but the information can be found in \emph{Introduction to Algorithms} by Thomas H. Cormen \textit{et al.}, or any other data structures or algorithmics book.
+
+\section{Queue}
+In algorithms \ref{alg:bfs} and \ref{alg:bfs_early_exit} we use a queue. A queue has two methods that modify the data in the structure:
+\begin{itemize}
+\item \emph{enqueue}: Adds an item at the back of the queue.
+\item \emph{dequeue}: Removes the item in front of the queue. If there are no items in the queue, it does nothing.
+\item \emph{empty}: Tells us whether the queue is empty or not.
+\end{itemize}
+For this reason, we say that a queue is a FIFO (first in, first out) structure, meaning that we will remove items from the queue in the same order as we inserted them. We always insert items from the back, and remove them from the front.
+
+We also have a method, \emph{front}, which returns the item in the first position in the queue, but doesn't remove it.
+
+All these methods have a time complexity of $O(1)$.
+
+\section{Priority Queue}
+In algorithms \ref{alg:dijkstra}, \ref{alg:greedy} and \ref{alg:astar} we use a priority queue. The priority queue works similarly to a queue, but each item also has a priority. This priority determines the order in which the items will be removed from the queue. In all our algorithms, we used a minimum priority queue, meaning that we associated a priority value to each item, and the item with minimum value would be served first. This is crucial for the correct functionality of all of our algorithms that use a priority queue. In Dijkstra, we used the current best distance to each node as the priority. In Greedy Best-First Search, we used the heuristic. And in $A^*$ we used the score function.
+
+We use the following methods from the priority queue:
+\begin{itemize}
+\item \emph{insert}: Takes a pair of item and priority, and inserts the item into the right place in the priority queue. This method has a time complexity of $O(\log n)$ where $n$ is the number of elements in the priority queue.
+\item \emph{removeMin}: Returns the item in the front of the priority queue, that is, the item with the smallest priority value (since it's a minimum priority queue), and removes it from the priority queue. This method has a time complexity of $O(1)$.
+\item \emph{empty}: Tells us whether the queue is empty or not. Its complexity is $O(1)$.
+\end{itemize}
+
+
+\section{Set}
+
+\section{Map}
+%TODO Talk about Queue, PriorityQueue, Map...
 
 
 \end{appendices}
