@@ -410,14 +410,14 @@ When a node is explored, its g-score, and thus its score will be updated. The ps
 \Ensure Given $u \in G$, previous[$u$] gives us the node come from to reach $u$ in the path computed, and g[$u$] is the current g-score of the node
 \State Q $\gets PriorityQueue()$
 \State S $\gets Set()$
-\State g $\gets Map()$
+\State $ g \gets Map()$
 \State previous $\gets Map()$
 \For {u $\in G$}
 	\State g[u] $\gets \infty$
 	\State previous[u] $\gets$ null
 \EndFor
 \State Q.insert((0, $\alpha$))
-\State g[$\alpha$] $\gets 0$
+\State $g[\alpha]$ $\gets 0$
 \While {not Q.empty()}
 	\State u $\gets$ Q.removeMin()
 	\State S.add(u)
@@ -428,9 +428,9 @@ When a node is explored, its g-score, and thus its score will be updated. The ps
 		\If {v $\in S$}
 			\Continue \Comment{Already explored node}
 		\EndIf
-		\State alt $\gets$ g[u] $+ w((u, v))$
-		\If {alt $<$ g[v]}
-			\State g[v] $\gets$ alt \Comment{Update the g-score}
+		\State alt $\gets g[u] + w((u, v))$
+		\If {alt $< g[v]$}
+			\State $g[v] \gets$ alt \Comment{Update the g-score}
 			\State $f = g[v] + h(v)$
 			\State Q.insert((v, f))
 			\State previous[v] $\gets$ u
@@ -705,8 +705,46 @@ Iterative Deepening $A^*$, or $\bm{IDA^*}$, is a variant of $A^*$ based on itera
 \begin{appendices}
 
 \chapter{Data structures}
-Talk about Queue, PriorityQueue, Map...
 
+In this appendix we will briefly explain the data structures we used in our algorithms. We will only explain them on the interface level, and give the complexity of each of its operations. There are many different ways to implement these structures, but the details on the implementation and justification of the complexity are out of the scope of this article, but the information can be found in \emph{Introduction to Algorithms} by Thomas H. Cormen \textit{et al.}, or any other data structures or algorithmics book.
+
+\section{Queue}
+In algorithms \ref{alg:bfs} and \ref{alg:bfs_early_exit} we use a queue. A queue has two methods that modify the data in the structure:
+\begin{itemize}
+\item \emph{enqueue}: Adds an item at the back of the queue.
+\item \emph{dequeue}: Removes the item in front of the queue. If there are no items in the queue, it does nothing.
+\item \emph{empty}: Tells us whether the queue is empty or not.
+\end{itemize}
+For this reason, we say that a queue is a FIFO (first in, first out) structure, meaning that we will remove items from the queue in the same order as we inserted them. We always insert items from the back, and remove them from the front.
+
+We also have a method, \emph{front}, which returns the item in the first position in the queue, but doesn't remove it.
+
+All these methods have a time complexity of $O(1)$.
+
+\section{Priority Queue}
+In algorithms \ref{alg:dijkstra}, \ref{alg:greedy} and \ref{alg:astar} we use a priority queue. The priority queue works similarly to a queue, but each item also has a priority. This priority determines the order in which the items will be removed from the queue. In all our algorithms, we used a minimum priority queue, meaning that we associated a priority value to each item, and the item with minimum value would be served first. This is crucial for the correct functionality of all of our algorithms that use a priority queue. In Dijkstra, we used the current best distance to each node as the priority. In Greedy Best-First Search, we used the heuristic. And in $A^*$ we used the score function.
+
+We use the following methods from the priority queue:
+\begin{itemize}
+\item \emph{insert}: Takes a pair of item and priority, and inserts the item into the right place in the priority queue. This method has a time complexity of $O(\log n)$ where $n$ is the number of elements in the priority queue.
+\item \emph{removeMin}: Returns the item in the front of the priority queue, that is, the item with the smallest priority value (since it's a minimum priority queue), and removes it from the priority queue. This method has a time complexity of $O(1)$.
+\item \emph{empty}: Tells us whether the queue is empty or not. Its complexity is $O(1)$.
+\end{itemize}
+
+We use the priority queue to get the node with minimum score (or distance in the case of Dijkstra, and h-score in the case of Greedy Best-First search) as the next node to be explored and closed. We also use this fact in many of the proofs.
+
+Note that there are other implementations of the priority queue in which insertion is $O(1)$ and removing the item with minimum value is $O(\log n)$, but in the end it doesn't matter which one we use.
+
+\section{Set}
+A set is an unordered list of unique items, but differs in implementation from a regular array, since it's usually implemented using a hash map, so lookup is much faster. We use mainly two operations on the set: the \emph{add} method, which inserts an item into the set, and the \emph{lookup} method (which we represented using mathematical notation in our conditions), which determines whether an item is part of the set or not. Both of these operations have a time complexity of $O(1)$.
+
+\section{Map}
+A map is a structure that stores data in pairs of key and value. Once we have some data in it, we look up using a key, which retrieves its corresponding value. In all of our algorithms, we used maps to store the node we came from for each visited node. In Dijkstra and $A^*$, we also used maps to store the current best distance from the source to each node, or equivalently the g-score. A map has two main methods: one to insert data and one to look up data. We have represented this using square bracket notation:
+\begin{itemize}
+\item To insert or update data in a map $d$, we use $d[key] = value$. If the key did not exist in the map, it will be added with the given value. If the key already existed in the map, its value will be updated to the given value.
+\item To look up data in a map $d$, we use $d[key]$, which would return the value associated to the given key. If the key was not in the map, this operation is illegal and the program should throw an error. In our case, we always initialize the maps at the beginning of the algorithms, so we can never run into this kind of problem.
+\end{itemize}
+Inserting and looking up data in a map has a time complexity of $O(1)$.
 
 \end{appendices}
 
