@@ -293,6 +293,10 @@ which is a contradiction.
 Therefore, $d_D(u, s) = \delta(u, s)$.
 \end{proof}
 
+\begin{definition}
+If an algorithm $A$ always finds an optimal path between two connected nodes, we say that $A$ is \textbf{admissible}.
+\end{definition}
+
 \begin{theorem}[Correctness of Dijkstra's algorithm]
 \label{thm:dijkstra}
 Let $G = (V, E)$ be a weighted directed graph. Let $u \in V$. Then, after running Dijkstra's algorithm with start node $u$, the following is true
@@ -300,6 +304,13 @@ Let $G = (V, E)$ be a weighted directed graph. Let $u \in V$. Then, after runnin
 \end{theorem}
 \begin{proof}
 We know that, at the end of Dijkstra's algorithm, we'll have explored all the nodes connected to $u$. That is, $S = C_u$. For each $v \in C_u$, apply \ref{lemma:dijkstra} to get the wanted result.
+\end{proof}
+
+\begin{corollary}
+Dijkstra's algorithm is admissible.
+\end{corollary}
+\begin{proof}
+Let $G = (V, E)$, and let $\alpha, \beta \in V$ be the source and goal nodes, respectively. If $\beta \not \in C_\alpha$, there doesn't exist an optimal path. Suppose $\beta \in C_\alpha$. By Theorem \ref{thm:dijkstra}, after running Dijkstra, $d_D(\alpha, \beta) = \delta(\alpha, \beta)$, so an optimal path has been found.
 \end{proof}
 
 Like with BFS, we can modify the algorithm to use early exit to improve performance.
@@ -472,9 +483,9 @@ f(v) &= g(v) + h(v)\\
 Since $P$ is an optimal path, $\hat{f}(v) = \hat{f}(\alpha) \  \forall v$ in the path $P$, which proves the lemma.
 \end{proof}
 
-\begin{theorem}[Correctness of $A^*$]
+\begin{theorem}[Admissibility of $A^*$]
 \label{thm:astar}
-If the heuristic is admissible, then $A^*$ always finds an optimal path between two connected nodes.
+If the heuristic is admissible, then $A^*$ is admissible.
 \end{theorem}
 \begin{proof}
 There are only three possible cases in which $A^*$ doesn't find an optimal path: the algorithm terminates at a node which is not the goal, terminates at the goal node but the path found isn't optimal, or fails to terminate at all. Let's consider the three cases separately.
@@ -536,12 +547,12 @@ In figure \ref{fig:node-expansion} we can see a visual comparison of the number 
 \chapter{Heuristics}
 In the previous chapter we have proved that as long as the heuristic is admissible, $A^*$ produces optimal paths. But not any admissible heuristic will give us the same performance. Take $h(u) = 0 \  \forall u \in V$ for example, which is always admissible, and the algorithm becomes equivalent to Dijkstra, as we can see in algorithm \ref{alg:dijkstra}. We see then that $A^*$ is actually a class of algorithms, and by selecting the g-score and h-score functions we select one of the algorithms from the class. We normally only change the h-score, and use the g-score defined previously, but notice how if we make $g(u) = 0 \  \forall u \in V$, then we get another subclass of algorithms depending on the h-score which are equivalent to the Greedy Best-First Search algorithm seen in section \ref{section:greedy}. Nonetheless, when talk about $A^*$, we will usually refer to one of the algorithms in the class, after selecting an heuristic.
 
-In this chapter, we will see that there exists an admissible heuristic which also makes $A^*$ optimal, meaning that no other pathfinding algorithm which produces optimal paths will expand fewer nodes. In practice, however, finding this perfect heuristic is often hard, but if we have enough information to constrain the set of accessible nodes 
+In this chapter, we will see that there exists an admissible heuristic which also makes $A^*$ optimal, meaning that no other admissible pathfinding algorithm will expand fewer nodes. In practice, however, finding this perfect heuristic is often hard, but if we have enough information to constrain the set of accessible nodes 
 
 \section{Consistent heuristics}
 
 \begin{definition}
-Given two pathfinding algorithms $A$ and $B$, we say that $A$ \textbf{dominates} $B$ if and only if both algorithms find optimal paths but the set of nodes that $A$ expands is a subset of the set of nodes that $B$ expands.
+Given two pathfinding algorithms $A$ and $B$, we say that $A$ \textbf{dominates} $B$ if and only if both algorithms are admissible but the set of nodes that $A$ expands is a subset of the set of nodes that $B$ expands.
 \end{definition}
 
 \begin{definition}
@@ -658,7 +669,7 @@ Since this is valid for any two nodes that are adjacent in the sequence, then we
 \section{Optimality of $A^*$}
 Choosing consistent heuristics has a practical benefit. Like we've seen in \ref{prop:heur1}, with a consistent heuristic we can avoid having to re-open nodes which were already closed.
 
-In this section we will prove the optimality 
+In this section we will prove the optimality %TODO finish
 
 \begin{proposition}
 Suppose we have an admissible heuristic, and let $\alpha$ be the source node $A^*$. Suppose that $A^*$ has not terminated yet. Then, for every closed node $u$,
@@ -670,6 +681,14 @@ But since $u$ was closed before $v$, then
 \[ f(u) \leq f(v) \leq \hat{f}(\alpha) \]
 \end{proof}
 
+In the next theorem, we will finally prove the optimality of $A^*$. Given a pathfinding algorithm $A$, and given a graph $G = (V, E)$, we say that $A$ is not more informed than $A^*$ if at any node $u \in V$, $A$ does not have information about unexplored nodes that $A^*$ does not have.
+
+\begin{theorem}[Optimality of $A^*$]
+Let $A$ be an admissible pathfinding algorithm not more informed than $A^*$. Let $G=(V,E)$ be any graph. Then, there exists an admissible heuristic $h$ such that every node $u \in V$ expanded by $A^*$ is also expanded by $A$.
+\end{theorem}
+\begin{proof}
+
+\end{proof}
 
 %TODO make proof of optimality
 
