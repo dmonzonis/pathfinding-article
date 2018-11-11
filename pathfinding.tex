@@ -380,6 +380,7 @@ In Dijkstra, we used the actual distances of the paths between nodes for the pri
 %TODO Talk about the problems with the greedy search
 
 \section{$A^*$}
+\label{section:astar}
 As we have seen, Dijkstra always gives us optimal paths, but it wastes a lot of time exploring a lot of nodes that are not in a promising direction. On the other hand, Greedy Best-First Search explores nodes in a promising direction, but does not produce optimal paths reliably.
 
 The $A^*$ algorithm is a combination of both algorithms. It takes into account both the actual distance from the source to a node, and the estimated distance from the node to the goal. Unlike Dijkstra's algorithm, which works for positive weights, $A^*$ only works with strictly positive weights.
@@ -544,10 +545,15 @@ In figure \ref{fig:node-expansion} we can see a visual comparison of the number 
 \label{fig:node-expansion}
 \end{figure}
 
-\chapter{Heuristics}
-In the previous chapter we have proved that as long as the heuristic is admissible, $A^*$ produces optimal paths. But not any admissible heuristic will give us the same performance. Take $h(u) = 0 \  \forall u \in V$ for example, which is always admissible, and the algorithm becomes equivalent to Dijkstra, as we can see in algorithm \ref{alg:dijkstra}. We see then that $A^*$ is actually a class of algorithms, and by selecting the g-score and h-score functions we select one of the algorithms from the class. We normally only change the h-score, and use the g-score defined previously, but notice how if we make $g(u) = 0 \  \forall u \in V$, then we get another subclass of algorithms depending on the h-score which are equivalent to the Greedy Best-First Search algorithm seen in section \ref{section:greedy}. Nonetheless, when talk about $A^*$, we will usually refer to one of the algorithms in the class, after selecting an heuristic.
 
-In this chapter, we will see that there exists an admissible heuristic which also makes $A^*$ optimal, meaning that no other admissible pathfinding algorithm will expand fewer nodes. In practice, however, finding this perfect heuristic is often hard, but if we have enough information to constrain the set of accessible nodes 
+\chapter{Heuristics}
+In the previous chapter we have proved that as long as the heuristic is admissible, $A^*$ produces optimal paths. But not any admissible heuristic will give us the same performance. Take $h(u) = 0 \  \forall u \in V$ for example, which is always admissible, and the algorithm becomes equivalent to Dijkstra, as we can see in algorithm \ref{alg:dijkstra}.
+
+We see that there is actually a class of $A^*$ algorithms, $\mathcal{A^*}$, and by selecting the g-score and h-score functions we select one of the algorithms from the class. We normally only change the h-score, and use the g-score defined previously, but notice how if we make $g(u) = 0 \  \forall u \in V$, then we get the Greedy Best-First Search algorithm seen in section \ref{section:greedy}. However, unless we explicitly say otherwise, we will always use the g-score we defined in section \ref{section:astar} for our $A^*$ algorithms.
+
+The algorithms in $\mathcal{A^*}$ are usually known as \textbf{informed} or \textbf{heuristic search algorithms}. They differ from uninformed search algorithms, like BFS or Dijkstra, mainly because they have some some information about unvisited nodes, in our case, the heuristic function.
+
+In this chapter, we will see that there exists a consistent  heuristic which also makes $A^*$ optimal, meaning that no other admissible pathfinding algorithm will expand fewer nodes. In practice, however, finding this perfect heuristic is often hard, but if we have enough information to constrain the set of accessible nodes 
 
 \section{Consistent heuristics}
 
@@ -614,12 +620,11 @@ The heuristic is clearly admissible, since $h(A) \leq \hat{h}(A) = 4$, $h(B) \le
 \label{fig:heuristic}
 \end{figure}
 
-%We will prove that with a consistent heuristic, $A^*$ is optimal. By proposition \ref{prop:consistent} we see that consistency is a stronger condition than admissibility, and therefore by theorem \ref{thm:astar}, the algorithm will still find optimal paths. But first, we need some preliminary results that will be used in the proof.
-The following proposition is of special interest, since it will allow us to implement $A^*$ without having to re-open closed nodes.
+The following result is of special interest, since it will allow us to design $A^*$ algorithms which don't require to re-open already closed nodes, simplifying the implementation and possibly improving performance.
 
 \begin{proposition}
 \label{prop:heur1}
-With a consistent heuristic, any closed node $u$ in the $A^*$ algorithm satisfies
+With a consistent heuristic, any node $u$ closed by $A^*$ satisfies
 \[ g(u) = \hat{g}(u) \]
 \end{proposition}
 \begin{proof}
@@ -667,30 +672,27 @@ Since this is valid for any two nodes that are adjacent in the sequence, then we
 \end{proof}
 
 \section{Optimality of $A^*$}
-Choosing consistent heuristics has a practical benefit. Like we've seen in \ref{prop:heur1}, with a consistent heuristic we can avoid having to re-open nodes which were already closed.
+Choosing consistent heuristics has a practical benefit. Like we've seen in Proposition \ref{prop:heur1}, with a consistent heuristic we can avoid having to re-open nodes which were already closed. We will prove that with a consistent heuristic, $A^*$ is optimal. By proposition \ref{prop:consistent} we see that consistency is a stronger condition than admissibility, and therefore by theorem \ref{thm:astar}, the algorithm will still find optimal paths. But first, we need some preliminary results that will be used in the proof.
 
-In this section we will prove the optimality %TODO finish
-
-\begin{proposition}
+\begin{lemma}
+\label{lemma:astar-opt}
 Suppose we have an admissible heuristic, and let $\alpha$ be the source node $A^*$. Suppose that $A^*$ has not terminated yet. Then, for every closed node $u$,
 \[ f(u) \leq \hat{f}(\alpha) \]
-\end{proposition}
+\end{lemma}
 \begin{proof}
 If $\beta$ is the goal node, then $u \neq \beta$ since the algorithm has not terminated. By Lemma \ref{lemma:astar2}, at the time time the node $u$ was closed, there existed a node $v \in O$ which is part of an optimal path $P$ from $\alpha$ to $\beta$ such that $f(v) \leq \hat{f}(\alpha)$.
 But since $u$ was closed before $v$, then
 \[ f(u) \leq f(v) \leq \hat{f}(\alpha) \]
 \end{proof}
 
-In the next theorem, we will finally prove the optimality of $A^*$. Given a pathfinding algorithm $A$, and given a graph $G = (V, E)$, we say that $A$ is not more informed than $A^*$ if at any node $u \in V$, $A$ does not have information about unexplored nodes that $A^*$ does not have.
-
 \begin{theorem}[Optimality of $A^*$]
-Let $A$ be an admissible pathfinding algorithm not more informed than $A^*$. Let $G=(V,E)$ be any graph. Then, there exists an admissible heuristic $h$ such that every node $u \in V$ expanded by $A^*$ is also expanded by $A$.
+Let $A$ be an admissible pathfinding algorithm no more informed than $A^*$. Let $G=(V,E)$ be any graph. Then, with an heuristic such that $h(u) = \hat{h}(u) \forall u \in V$, there exists an algorithm $A^* \in \mathcal{A^*}$ such that every node $u \in V$ expanded by $A^*$ is also expanded by $A$.
 \end{theorem}
 \begin{proof}
+Let $G = (V, E)$ be a graph, and let $\alpha, \beta \in V$ be two connected nodes. We will execute the pathfinding algorithms with source node $\alpha$ and goal node $\beta$. Let $K$ be the set of nodes expanded by $A$ in its execution, and let $P$ be the optimal path found by $A$. We will construct the heuristic that satisfies the theorem recursively.
 
+Let $h$ be an heuristic, which we use in $A^*$ as h-score. If with this heuristic all the nodes expanded by $A^*$ are in $K$ then the proof is finished. Suppose that there are nodes expanded by $A^*$ that are not in $K$. Let $u$ be the first node expanded by $A^*$ such that $u \not \in K$. By Lemma \ref{lemma:astar-opt}, we know that $f(u) \leq \hat{f}(\alpha)$. Suppose that $f(u) < \hat{f}(\alpha) = \hat{f}(\beta)$.
 \end{proof}
-
-%TODO make proof of optimality
 
 
 \chapter{$A^*$ variants}
