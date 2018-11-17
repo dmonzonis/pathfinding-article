@@ -18,6 +18,10 @@
 }
 \makeatother
 
+% Better looking empty set
+\let\oldemptyset\emptyset
+\let\emptyset\varnothing
+
 % algpseudocode modifications
 \renewcommand{\algorithmicrequire}{\textbf{Input:}}
 \renewcommand{\algorithmicensure}{\textbf{Output:}}
@@ -29,6 +33,10 @@
 \newtheorem{proposition}[theorem]{Proposition}
 \newtheorem{lemma}[theorem]{Lemma}
 \newtheorem{corollary}[theorem]{Corollary}
+
+% DEBUG commands
+\newcommand{\DEBUGComment}[1]{{\color{red}{#1}}}
+\newcommand{\DEBUGQuestion}[1]{{\color{blue}{#1}}}
 
 \title{
 {Pathfinding algorithms in graphs and applications}\\
@@ -50,7 +58,7 @@ Many problems in the fields of science, mathematics and engineering can be gener
 For most of the examples in the article we will be using a grid graph, represented by a tiled 2D map, in which each tile (or node) is connected to its adjacent tiles. In the map, each tile can have a different weight, or be a wall, which is impassable. This notion of weighted nodes and walls can be translated to the structure of a weighted directed graph by thinking of the weights of the tiles as the weights of the edges that connect adjacent tiles to it. Walls can be thought of as nodes that are not connected (or just non-existent) to any other node, and therefore not reachable from other nodes. A pathfinding simulator was built for this article to help illustrate these examples.
 
 \chapter{The $A^*$ algorithm}
-The $A^*$ algorithm is a very popular algorithm used in many applications to find the optimal path between two points. The algorithm works on graphs, a structure well studied in graph theory, so first we will refresh some definitions.
+The $A^*$ algorithm is a very popular algorithm used in many applications to find optimal paths between points. The algorithm works on graphs, a structure well studied in graph theory.
 
 \begin{definition}
 A \textbf{directed graph} $G$ is a pair of sets $(V, E)$, where $V$ is the set of vertices or nodes, and $E$ the set of edges, formed by pairs of vertices.
@@ -68,7 +76,6 @@ From now on, when we talk about a graph, we will implicitly refer to a finite we
 Given a graph $G$, and $u, v \in V$, a \textbf{path} $P$ between $u$ and $v$ is an ordered list of a certain amount of edges, $N$, in the form
 
 \[ P = \{(u,v_1), (v_1, v_2), \dots, (v_{N-2}, v_{N-1}), (v_{N-1}, v)\} \]
-
 \end{definition}
 
 Note that paths are not unique. There may exist multiple paths between two nodes.
@@ -113,7 +120,7 @@ Instead of presenting the $A^*$ algorithm without any background, we will first 
 \section{BFS}
 Breadth-First Search, or BFS for short, attempts to find a path by methodically examining all the neighbours of each node it examines.
 
-The algorithm uses a queue to keep track of the next nodes to examine, adding all unvisited neighbours of a node when it is examined, until the queue is empty. Explored nodes are kept in a set, so that we don't explore the same node twice. The set of nodes that haven't been explored yet is often called the \emph{open set}, and the set of visited nodes the \emph{closed set}. In the same way, nodes in the open set are called \emph{open nodes}, and nodes in the closed set are called \emph{closed nodes}.
+The algorithm uses a queue\footnote{See \ref{annex:queue} for more information on queues.} to keep track of the next nodes to examine, adding all unvisited neighbours of a node when it is examined, until the queue is empty. Explored nodes are kept in a set, so that we don't explore the same node twice. The set of nodes that haven't been explored yet is often called the \emph{open set}, and the set of visited nodes the \emph{closed set}. In the same way, nodes in the open set are called \emph{open nodes}, and nodes in the closed set are called \emph{closed nodes}.
 
 The pseudocode for the algorithm is presented in algorithm \ref{alg:bfs}. The algorithm returns a map called \emph{previous}, which maps every node to the node we came from in the path that the algorithm computes. The procedure that we will use to reconstruct the path from this map for all algorithms is presented in algorithm \ref{alg:reconstruct}.
 
@@ -123,23 +130,23 @@ The pseudocode for the algorithm is presented in algorithm \ref{alg:bfs}. The al
 \begin{algorithmic}[1]
 \Procedure{BFS}{$G, \alpha, \beta$}
 \Require Graph $G = (V, E)$, directed or undirected; source node $\alpha \in V$; goal node $\beta \in V$
-\Ensure Given $u \in G$, previous[$u$] gives us the node come from to reach $u$ in the path computed
+\Ensure Given $u \in V$, previous[$u$] gives us the node come from to reach $u$ in the path computed
 \State Q $\gets Queue()$
-\State S $\gets Set()$ \Comment{Keeps track of explored nodes}
+\State $S \gets Set()$ \Comment{Keeps track of explored nodes}
 \State previous $\gets Map()$
-\For {u $\in G$}
-	\State previous[u] $\gets$ null
+\For {$u \in V$}
+	\State previous[$u$] $\gets \varnothing$
 \EndFor
 \State Q.enqueue($\alpha$)
-\State S.add($\alpha$)
+\State $S$.add($\alpha$)
 \While {not Q.empty()}
-	\State u $\gets$ Q.front()
+	\State $u \gets$ Q.front()
 	\State Q.dequeue()
-	\For {v $\in$ u.neighbours()}
-		\If {v $\not\in$ S}
-			\State Q.enqueue(v)
-			\State S.add(v)
-			\State previous[v] $\gets$ u
+	\For {v $\in$ $u$.neighbours()}
+		\If {$v \not\in S$}
+			\State Q.enqueue($v$)
+			\State S.add($v$)
+			\State previous[$v$] $\gets u$
 		\EndIf
 	\EndFor
 \EndWhile
@@ -156,10 +163,10 @@ The pseudocode for the algorithm is presented in algorithm \ref{alg:bfs}. The al
 \Require The map $previous$ returned by the pathfinding algorithm; source node $\alpha \in V$; goal node $\beta \in V$
 \Ensure An ordered list $P$ with the nodes from the path from $\alpha$ to $\beta$
 \State $P \gets$ []  \Comment{Empty array for the path}
-\State u $\gets \beta$
-\While {u $\neq \alpha$}
-	\State $P$.push(u)
-	\State u $\gets$ previous[$\beta$]
+\State $u \gets \beta$
+\While {$u \neq \alpha$}
+	\State $P$.push($u$)
+	\State $u \gets$ previous[$\beta$]
 \EndWhile
 \State $P$.push($\alpha$)
 \State \Return $P$.reversed()
@@ -167,34 +174,36 @@ The pseudocode for the algorithm is presented in algorithm \ref{alg:bfs}. The al
 \end{algorithmic}
 \end{algorithm}
 
-We see that with this version of BFS, all nodes in the connected component of the starting node are explored. We can improve performance if we perform an early exit, since we don't need to keep exploring once we find the end node, as shown in algorithm \ref{alg:bfs_early_exit}.
+In the rest of this article, we will consider a set of goal nodes instead of a single goal node, since this makes the algorithms, and therefore the results shown, more general. We will call this set of goal nodes $T$. This way, having a single goal node is only a special case of the more general condition when $|T| = 1$.
+
+We see that with this version of BFS, all nodes in the connected component of the starting node are explored. We can improve the performance if we halt the execution once we reach a goal node, which is a fair condition since all we're looking for is a path between the source and a goal node, and once we find it we don't need to keep searching. This new version of the algorithm with the early exit is shown in algorithm \ref{alg:bfs_early_exit}.
 
 \begin{algorithm}
 \caption{Breadth-First Search with early exit}
 \label{alg:bfs_early_exit}
 \begin{algorithmic}[1]
-\Procedure{BFS}{$G, \alpha, \beta$}
-\Require Graph $G = (V, E)$, directed or undirected; source node $\alpha \in V$; goal node $\beta \in V$
-\Ensure Given $u \in G$, previous[$u$] gives us the node come from to reach $u$ in the path computed, if it has been explored
+\Procedure{BFS}{$G, \alpha, T$}
+\Require Graph $G = (V, E)$, directed or undirected; source node $\alpha \in V$; set of goal nodes $T \subset V$
+\Ensure Given $u \in V$, previous[$u$] gives us the node come from to reach $u$ in the path computed, if it has been explored
 \State Q $\gets Queue()$
-\State S $\gets Set()$
+\State $S \gets Set()$
 \State previous $\gets Map()$
-\For {u $\in G$}
-	\State previous[u] $\gets$ null
+\For {$u \in V$}
+	\State previous[$u$] $\gets \varnothing$
 \EndFor
 \State Q.enqueue($\alpha$)
-\State S.add($\alpha$)
+\State $S$.add($\alpha$)
 \While {not Q.empty()}
-	\State u $\gets$ Q.front()
+	\State $u \gets$ Q.front()
 	\State Q.dequeue()
-	\For {v $\in$ u.neighbours()}
-		\If {v $\not\in$ S}
-			\If {v $= \beta$} \Comment{Early exit condition}
-				\State \Return ReconstructPath(previous,$\alpha$,$\beta$)
+	\For {$v \in$ u.neighbours()}
+		\If {$v \not\in$ S}
+			\If {$v \in T$} \Comment{Early exit condition}
+				\State \Return ReconstructPath(previous,$\alpha$,$v$)
 			\EndIf
-			\State Q.enqueue(v)
-			\State S.add(v)
-			\State previous[v] $\gets$ u
+			\State Q.enqueue($v$)
+			\State S.add($v$)
+			\State previous[$v$] $\gets u$
 		\EndIf
 	\EndFor
 \EndWhile
@@ -212,48 +221,48 @@ Note that, even though BFS will always find a path between two nodes if they are
 \label{fig:bfs-fail}
 \end{figure}
 
-
 Also, the algorithm doesn't seem very efficient, since we can potentially explore lots of nodes on a very dense graph.
 
-We will first address the optimality problem in the next algorithm, and then we will focus on efficiency.
+We will first address the optimality problem in the next section, and then we will focus on efficiency.
+
 
 \section{Dijkstra}
-The Dijkstra algorithm is also a well known graph theory algorithm, used to find the optimal path between two nodes in a graph with positive weights. Now, instead of a simple queue, we use a priority queue. We keep exploring all unvisited neighbours of a node, but now we insert them in the priority queue using the distance of the edge.
+Dijkstra's algorithm is also a well known graph theory algorithm, used to find optimal paths between nodes in a graph with positive weights. Now, instead of a simple queue, we use a priority queue\footnote{See \ref{annex:priorityqueue} for more information on priority queues.}. We keep exploring all unvisited neighbours of a node, but now we insert them in the priority queue using the distance of the edge, in a way that the node with the least distance from the source will be extracted first.
 
-Normally, the algorithm only gets a starting node, and computes the optimal paths to all reachable nodes from the origin, but since we're only concerned about finding the path from one specific node to another, we will use the early exit condition to end the execution as soon as we explore the goal node. We will later see that this still gives us the optimal path.
+Normally, the algorithm only gets a starting node, and computes the optimal paths to all reachable nodes from the origin, but since we're only concerned about finding the path to one of the goal nodes, we will use the early exit condition to end the execution as soon as we expand a goal node. Later, we will see that this still gives us the optimal path.
 
 \begin{algorithm}
 \caption{Dijkstra's algorithm}
 \label{alg:dijkstra}
 \begin{algorithmic}[1]
-\Procedure{Dijkstra}{$G$, $\alpha$, $\beta$}
-\Require Graph $G = (V, E)$, directed or undirected; source node $\alpha \in V$; goal node $\beta \in V$
-\Ensure Given $u \in G$, previous[$u$] gives us the node come from to reach $u$ in the path computed, and d[$u$] gives us the distance to that node, if it has been explored
+\Procedure{Dijkstra}{$G$, $\alpha$, $T$}
+\Require Graph $G = (V, E)$, directed or undirected; source node $\alpha \in V$; set of goal nodes $T \subset V$
+\Ensure Given $u \in V$, previous[$u$] gives us the node come from to reach $u$ in the path computed, and d[$u$] gives us the distance to that node, if it has been explored
 \State Q $\gets PriorityQueue()$
-\State S $\gets Set()$
+\State $S \gets Set()$
 \State d $\gets Map()$ \Comment{Keeps track of the shortest distance to each node}
 \State previous $\gets Map()$
-\For {u $\in G$}
-	\State d[u] $\gets \infty$
-	\State previous[u] $\gets$ null
+\For {$u \in V$}
+	\State d[$u$] $\gets \infty$
+	\State previous[$u$] $\gets \varnothing$
 \EndFor
 \State Q.insert((0, $\alpha$))
 \State d[$\alpha$] $\gets 0$
 \While {not Q.empty()}
 	\State u $\gets$ Q.removeMin()
 	\State S.add(u)
-	\If {u $= \beta$} \Comment{Early exit condition}
-		\State \Return ReconstructPath(previous,$\alpha$,$\beta$)
+	\If {$u \in T$} \Comment{Early exit condition}
+		\State \Return ReconstructPath(previous,$\alpha$,$u$)
 	\EndIf
-	\For {v $\in$ u.neighbours()}
-		\If {v $\in S$}
+	\For {$v \in$ $u$.neighbours()}
+		\If {$v \in S$}
 			\Continue \Comment{Already explored node}
 		\EndIf
-		\State alt $\gets$ d[u] $+ w((u, v))$
-		\If {alt $<$ d[v]}
-			\State d[v] $\gets$ alt
-			\State Q.insert((v, alt))
-			\State previous[v] $\gets$ u
+		\State alt $\gets$ d[$u$] $+ w((u, v))$
+		\If {alt $<$ d[$v$]}
+			\State d[$v$] $\gets$ alt
+			\State Q.insert(($v$, alt))
+			\State previous[$v$] $\gets u$
 		\EndIf
 	\EndFor
 \EndWhile
@@ -261,7 +270,7 @@ Normally, the algorithm only gets a starting node, and computes the optimal path
 \end{algorithmic}
 \end{algorithm}
 
-We will now prove the correctness of the algorithm without the early exit condition, that is, given a node $u \in V$, the algorithm always finds the optimal path between $u$ and all other nodes $v \in V$ such that $u$ and $v$ are connected. We will do so by induction on the visited set used in algorithm \ref{alg:dijkstra}, which we will call $S$. We will also write the distance computed by Dijkstra's algorithm between two nodes $u, v$ as $d_D(u, v)$.
+We will now prove the correctness of the algorithm without the early exit condition, that is, given a node $u \in V$, the algorithm always finds the optimal path between $u$ and all other nodes $v \in V$ such that $u$ and $v$ are connected. We will do so by induction on the visited set used in algorithm \ref{alg:dijkstra}, $S$. We will also write the distance computed by Dijkstra's algorithm between two nodes $u, v$ as $d_D(u, v)$.
 
 \begin{lemma}
 \label{lemma:dijkstra}
@@ -293,10 +302,6 @@ which is a contradiction.
 Therefore, $d_D(u, s) = \delta(u, s)$.
 \end{proof}
 
-\begin{definition}
-If an algorithm $A$ always finds an optimal path between two connected nodes, we say that $A$ is \textbf{admissible}.
-\end{definition}
-
 \begin{theorem}[Correctness of Dijkstra's algorithm]
 \label{thm:dijkstra}
 Let $G = (V, E)$ be a weighted directed graph. Let $u \in V$. Then, after running Dijkstra's algorithm with start node $u$, the following is true
@@ -307,7 +312,7 @@ We know that, at the end of Dijkstra's algorithm, we'll have explored all the no
 \end{proof}
 
 \begin{corollary}
-Dijkstra's algorithm is admissible.
+Given a source node and a single goal node, Dijkstra's algorithm always finds an optimal path between the two nodes if it exists.
 \end{corollary}
 \begin{proof}
 Let $G = (V, E)$, and let $\alpha, \beta \in V$ be the source and goal nodes, respectively. If $\beta \not \in C_\alpha$, there doesn't exist an optimal path. Suppose $\beta \in C_\alpha$. By Theorem \ref{thm:dijkstra}, after running Dijkstra, $d_D(\alpha, \beta) = \delta(\alpha, \beta)$, so an optimal path has been found.
@@ -315,56 +320,58 @@ Let $G = (V, E)$, and let $\alpha, \beta \in V$ be the source and goal nodes, re
 
 Like with BFS, we can modify the algorithm to use early exit to improve performance.
 \begin{proposition}
-Using Dijkstra's algorithm with early exit with start node $u$ and end node $v$ ensures that $d_D(u, v) = \delta(u, v)$.
+Using Dijkstra's algorithm with early exit with start node $\alpha$ and a single goal node $\beta$ ensures that an optimal path from $\alpha$ to $\beta$ will be found.
 \end{proposition}
 \begin{proof}
-With early exit, when we explore node $v$ we will end the execution of the algorithm. Using \ref{lemma:dijkstra}, we know that $d_D(u, v) = \delta(u, v)$, so we already have the optimal path between the two nodes.
+With early exit, when we explore the goal node $\beta$ we will end the execution of the algorithm. Using \ref{lemma:dijkstra}, we know that $d_D(u, \beta) = \delta(u, \beta)$, so we already have the optimal path between the two nodes.
 \end{proof}
 
-% TODO: Talk about what happens when there are negative weights. Name Bellman-Ford algorithm.
+%TODO Talk about what happens when there are negative weights. Name Bellman-Ford algorithm.
 Note that Dijkstra's algorithm only works for graphs with positive weights. For graphs with negative weights, there are other less efficient algorithms which also find optimal paths, like the Bellman-Ford algorithm.
 
 \section{Greedy Best-First search}
 \label{section:greedy}
-As we have seen in the last section, we now have an algorithm that can find the optimal path between any two nodes in a graph with positive weights. We will now start to worry about improving the performance of the algorithms.
+As we have seen in the last section, we now have an algorithm that can find the optimal path between any two nodes in a graph with positive weights. We will now start to worry about improving the performance of the algorithm.
 
-Let's forget about optimality for a while, and modify our pathfinding algorithm to use only an heuristic. An heuristic is a function
+\begin{definition}
+Given any node $u \in V$, $t \in T$ is a \textbf{preferred goal node} of $u$ if the distance of an optimal path from $u$ to $t$ does not exceed the distance of any other path from $u$ to a node in $T$.
+\end{definition}
+
+Let's forget about optimality for a moment, and modify our pathfinding algorithm to use only an heuristic. An heuristic is a function
 \begin{align*}
 	h \colon V &\to \mathbb{R}\\
 	u &\mapsto h(u)
 \end{align*}
-which gives an estimate of the true distance from a node to the goal node, which we compute without having to expand extra nodes, and varies with each type of problem we have.
+which gives an estimate of the distance from a node to one of its preferred goal nodes, which we compute without having to expand extra nodes, and varies with each type of problem we have.
 
-We will talk more about heuristics later, but for now, let's consider what happens when we use heuristics instead of the actual distance of the paths between nodes, like we did in Dijkstra's algorithm, for the priority queue ordering. 
-
-In Dijkstra, we used the actual distances of the paths between nodes for the priority queue ordering. Now, we will use the heuristic, so that the node closest to the goal will be the first to be explored.
+We will talk more about heuristics later, but for now, let's consider what happens when we use heuristics instead of the actual distance of the paths between nodes, like we did in Dijkstra's algorithm, for the priority queue ordering. When using the heuristic as ordering, the node closest to the goal will be the first to be explored, not regarding the distance travelled so far.
 
 \begin{algorithm}
 \caption{Greedy Best-First search}
 \label{alg:greedy}
 \begin{algorithmic}[1]
-\Procedure{GreedyBestFirstSearch}{$G$, $\alpha$, $\beta$}
-\Require Graph $G = (V, E)$, directed or undirected; source node $\alpha \in V$; goal node $\beta \in V$
-\Ensure Given $u \in G$, previous[$u$] gives us the node come from to reach $u$ in the path computed, if it has been explored
+\Procedure{GreedyBestFirstSearch}{$G$, $\alpha$, $T$}
+\Require Graph $G = (V, E)$, directed or undirected; source node $\alpha \in V$; set of goal nodes $T \subset V$
+\Ensure Given $u \in V$, previous[$u$] gives us the node come from to reach $u$ in the path computed, if it has been explored
 \State Q $\gets PriorityQueue()$
-\State S $\gets Set()$
+\State $S \gets Set()$
 \State previous $\gets Map()$
-\For {u $\in G$}
-	\State previous[u] $\gets$ null
+\For {$u \in V$}
+	\State previous[$u$] $\gets \varnothing$
 \EndFor
 \State Q.insert((0, $\alpha$))
 \While {not Q.empty()}
-	\State u $\gets$ queue.removeMin()
-	\State S.add(u)
-	\If {u $= \beta$} \Comment{Early exit condition}
-		\State \Return ReconstructPath(previous,$\alpha$,$\beta$)
+	\State $u \gets$ queue.removeMin()
+	\State S.add($u$)
+	\If {$u \in T$} \Comment{Early exit condition}
+		\State \Return ReconstructPath(previous,$\alpha$,$u$)
 	\EndIf
-	\For {v $\in$ u.neighbours()}
-		\If {v $\in S$}
+	\For {$v \in$ $u$.neighbours()}
+		\If {$v \in S$}
 			\Continue
 		\EndIf
-		\State Q.insert((v, $h(v)$))
-		\State previous[v] $\gets$ u
+		\State Q.insert(($v$, $h(v)$))
+		\State previous[$v$] $\gets u$
 	\EndFor
 \EndWhile
 \EndProcedure
@@ -383,22 +390,31 @@ In Dijkstra, we used the actual distances of the paths between nodes for the pri
 \label{section:astar}
 As we have seen, Dijkstra always gives us optimal paths, but it wastes a lot of time exploring a lot of nodes that are not in a promising direction. On the other hand, Greedy Best-First Search explores nodes in a promising direction, but does not produce optimal paths reliably.
 
-The $A^*$ algorithm is a combination of both algorithms. It takes into account both the actual distance from the source to a node, and the estimated distance from the node to the goal. Unlike Dijkstra's algorithm, which works for positive weights, $A^*$ only works with strictly positive weights.
-
-Given two connected nodes $\alpha, \beta \in V$, consider the optimal path between $\alpha$ and $\beta$, $P$. For any node $u$ that is part of $P$, we define a function $\hat{f}(u) = \hat{g}(u) + \hat{h}(u)$, where $\hat{g}(u) = \delta(\alpha, u)$ and $\hat{h}(u) = \delta(u, \beta)$. Note that for any other node $v$ in the optimal path $P$, $\hat{f}(u) = \hat{f}(v)$.
-
-Now suppose we have functions $g(u)$ and $h(u)$ which give us estimates for $\hat{g}(u)$ and $\hat{h}(u)$ respectively.
+The $A^*$ algorithm is a combination of both algorithms. It takes into account both the actual distance from the source to a node, and the estimated distance from the node to the goal. Unlike Dijkstra's algorithm, which works for positive weights including zero, $A^*$ only works with strictly positive weights.
 
 \begin{definition}
-Given a source and goal nodes in a graph $G = (V, E)$, we define the \textbf{score} as a function $f \colon V \to \mathbb{R}$ defined as
+If an algorithm $A$ always finds an optimal path between the source node and a preferred goal node, we say that $A$ is \textbf{admissible}.
+\end{definition}
+
+Given a source node $\alpha \in V$ and a set of goal nodes $T$, let $\hat{f}(u) = \hat{g}(u) + \hat{h}(u)$, where 
+\begin{align*}
+\hat{g}(u) = \delta(\alpha, u)\\
+\hat{h}(u) = \min_{t \in T} \delta(u, t)
+\end{align*}
+ 
+Note that for any node $v$ in an optimal path between $\alpha$ and a preferred goal node $t$ of $\alpha$, $\hat{f}(v) = \hat{f}(\alpha) = \hat{f}(t)$.
+
+Let $g(u)$ and $h(u)$ be functions which give us estimates for $\hat{g}(u)$ and $\hat{h}(u)$ respectively.
+
+\begin{definition}
+Given a source node and a set of goal nodes in a graph $G = (V, E)$, we define the \textbf{score} as a function $f \colon V \to \mathbb{R}$ defined as
 \begin{equation}
 	f(u) = g(u) + h(u)
 \end{equation}
-where $g(u)$ is an estimate of the optimal distance from the source to the node $u$, and $h(u)$ is an estimate of the optimal distance from the node $u$ to the goal.
-We will call $g$ the \textbf{g-score}, and $h$ the \textbf{h-score}.
+where $g(u)$ is an estimate of the optimal distance from the source to the node $u$, and $h(u)$ is an estimate of the optimal distance from the node $u$ to one of its preferred goal nodes. We usually call $g$ the \textbf{g-score}, and $h$ the \textbf{h-score}.
 \end{definition}
 
-In $A^*$, a good choice for the g-score is using, for each node $u$, the cost of the path from the source to $u$ found so far by the algorithm, which would be equivalent to the distance map we kept updating in Dijkstra's algorithm. Note that this implies $g(u) \geq \hat{g}(u) \ \forall u \in V$. For the h-score, we will use some heuristic.
+In $A^*$, a good choice for the g-score is using, for each node $u$, the cost of the path from the source to $u$ found so far by the algorithm, which is equivalent to the distance we kept updating in Dijkstra's algorithm. Note that this implies $g(u) \geq \hat{g}(u) \ \forall u \in V$. For the h-score, we use some heuristic, which will depend on the problem.
 
 When a node is explored, its g-score, and thus its score will be updated. The pseudocode for the algorithm is shown in algorithm \ref{alg:astar}. As we can see, it's very similar to Dijkstra's, except that we now use the score for the priority queue ordering, instead of just the distance to that node.
 
@@ -406,35 +422,35 @@ When a node is explored, its g-score, and thus its score will be updated. The ps
 \caption{$A^*$ algorithm}
 \label{alg:astar}
 \begin{algorithmic}[1]
-\Procedure{AStar}{$G$, $\alpha$, $\beta$}
-\Require Graph $G = (V, E)$, directed or undirected; source node $\alpha \in V$; goal node $\beta \in V$
-\Ensure Given $u \in G$, previous[$u$] gives us the node come from to reach $u$ in the path computed, and g[$u$] is the current g-score of the node
+\Procedure{AStar}{$G$, $\alpha$, $T$}
+\Require Graph $G = (V, E)$, directed or undirected; source node $\alpha \in V$; set of goal nodes $T \subset V$
+\Ensure Given $u \in V$, previous[$u$] gives us the node come from to reach $u$ in the path computed, and g[$u$] is the current g-score of the node
 \State Q $\gets PriorityQueue()$
-\State S $\gets Set()$
-\State $ g \gets Map()$
+\State $S \gets Set()$
+\State $g \gets Map()$
 \State previous $\gets Map()$
-\For {u $\in G$}
-	\State g[u] $\gets \infty$
-	\State previous[u] $\gets$ null
+\For {$u \in V$}
+	\State g[$u$] $\gets \infty$
+	\State previous[$u$] $\gets \varnothing$
 \EndFor
 \State Q.insert((0, $\alpha$))
 \State $g[\alpha]$ $\gets 0$
 \While {not Q.empty()}
-	\State u $\gets$ Q.removeMin()
-	\State S.add(u)
-	\If {u $= \beta$} \Comment{Early exit condition}
-		\State \Return ReconstructPath(previous,$\alpha$,$\beta$)
+	\State $u \gets$ Q.removeMin()
+	\State $S$.add($u$)
+	\If {$u \in T$} \Comment{Early exit condition}
+		\State \Return ReconstructPath(previous,$\alpha$,$u$)
 	\EndIf
-	\For {v $\in$ u.neighbours()}
-		\If {v $\in S$}
+	\For {$v \in u$.neighbours()}
+		\If {$v \in S$}
 			\Continue \Comment{Already explored node}
 		\EndIf
 		\State alt $\gets g[u] + w((u, v))$
 		\If {alt $< g[v]$}
 			\State $g[v] \gets$ alt \Comment{Update the g-score}
 			\State $f = g[v] + h(v)$
-			\State Q.insert((v, f))
-			\State previous[v] $\gets$ u
+			\State Q.insert(($v$, $f$))
+			\State previous[$v$] $\gets u$
 		\EndIf
 	\EndFor
 \EndWhile
@@ -443,17 +459,18 @@ When a node is explored, its g-score, and thus its score will be updated. The ps
 \end{algorithm}
 
 %TODO is this paragraph necessary...?
-This new algorithm is faster than Dijkstra, but it only finds optimal paths within a certain condition, which is what we will prove next.
+This new algorithm is faster than Dijkstra, but it only finds optimal reliably paths under a certain condition, which is what we will prove next.
 
 \begin{definition}
-A heuristic $h$ is said to be \textbf{admissible} if and only if, $\forall u \in V$, $h(u)$ never overestimates the real cost of moving from $u$ to the goal, that is, given a goal node $v \in V$, then $\forall u \in V \ h(u) \le \hat{h}(u) = \delta(u, v)$.
+A heuristic $h$ is said to be \textbf{admissible} if and only if, $\forall u \in V$, $h(u)$ never overestimates the real cost of moving from $u$ to a preferred goal node of $u$, that is, 
+\[ \forall u \in V \ h(u) \le \hat{h}(u) \]
 \end{definition}
 
-We will prove that, with the score function we have constructed, $A^*$ finds optimal paths as long as the heuristic is admissible. Consider a graph $G = (V, E)$, a source node $\alpha$ and a goal node $\beta$, such that $\alpha$ and $\beta$ are connected. Consider the closed set $S$, which corresponds to the set of visited nodes in the algorithm, and the open set $O$, which are the nodes that haven't been explored yet.
+We will prove that, with the score function we have constructed, an admissible heuristic implies that $A^*$ is admissible. Consider a graph $G = (V, E)$, a source node $\alpha$ and a set of goal nodes $T$, such that $\forall t \in T$, $t \in C_\alpha$. Consider the closed set $S$, which corresponds to the set of visited nodes in the algorithm, and the open set $O$, which are the nodes that haven't been explored yet.
 
 \begin{lemma}
 \label{lemma:astar1}
- For any node $u \not \in S$ and for any optimal path $P$ from $\alpha$ to $u$, $\exists v \in O$ which is part of $P$ such that $g(v) = \hat{g}(v)$.
+For any node $u \not \in S$ and for any optimal path $P$ from $\alpha$ to $u$, $\exists v \in O$ which is part of $P$ such that $g(v) = \hat{g}(v)$.
 \end{lemma}
 \begin{proof}
 Consider an optimal path from $\alpha$ to $u$,
@@ -472,7 +489,7 @@ Now, $g(v) \leq g(n^*) + w((n^*, v))$ by the definition of $g$, and since $n^* \
 
 \begin{lemma}
 \label{lemma:astar2}
-Suppose the heuristic used by $A^*$ is admissible, and suppose $A^*$ has not terminated. Then, for any optimal path $P$ from $\alpha$ to $\beta$, $\exists v \in O$ which is part of $P$ such that $f(v) \leq \hat{f}(\alpha)$.
+Suppose the heuristic used by $A^*$ is admissible, and suppose $A^*$ has not finished its execution yet. Then, for any optimal path $P$ from $\alpha$ to a preferred goal node of $\alpha$, $\exists v \in O$ which is part of $P$ such that $f(v) \leq \hat{f}(\alpha)$.
 \end{lemma}
 \begin{proof}
 By lemma \ref{lemma:astar1}, $\exists v$ in $P$ with $g(v) = \hat{g}(v)$. Therefore, by the definition of the score function and the hypothesis,
@@ -489,11 +506,11 @@ Since $P$ is an optimal path, $\hat{f}(v) = \hat{f}(\alpha) \  \forall v$ in the
 If the heuristic is admissible, then $A^*$ is admissible.
 \end{theorem}
 \begin{proof}
-There are only three possible cases in which $A^*$ doesn't find an optimal path: the algorithm terminates at a node which is not the goal, terminates at the goal node but the path found isn't optimal, or fails to terminate at all. Let's consider the three cases separately.
+There are only three possible cases in which $A^*$ doesn't find an optimal path: the algorithm terminates at a node which is not a goal node, terminates at a goal node but the path found isn't optimal, or fails to terminate at all. Let's consider the three cases separately.
 
-Consider the case where the algorithm terminates at a node which is not the goal. Since we are using the early exit condition, which makes the algorithm terminate whenever it puts the goal node in the closed set, the only possible way that the algorithm terminates without having found the goal node is if the goal node was never in the open set to start with, or equivalently, the goal node is not connected to the start node, which contradicts our hypothesis.
+Consider the case where the algorithm terminates at a node which is not a goal node. Since we are using the early exit condition, which makes the algorithm terminate whenever it expands a goal node, the only possible way that the algorithm terminates without having found a goal node is if there wasn't any goal node in the open set to start with, or equivalently, no goal node is not connected to the start node, which contradicts our hypothesis.
 
-Consider the case where the algorithm terminates at the goal node, but doesn't find an optimal path. Note that since the heuristic is admissible
+Consider the case where the algorithm terminates at a goal node, but doesn't find an optimal path. Let $\beta$ be the goal node at which the algorithm terminates. Note that since the heuristic is admissible
 \[ 0 \leq h(\beta) \leq \hat{h}(\beta) = 0 \  \Rightarrow \  h(\beta) = 0 \]
 In this case, by the time the algorithm terminates, we have $f(\beta) = g(\beta) > \hat{f}(\alpha)$ because the path found is not optimal. But by lemma \ref{lemma:astar2}, just before termination, there existed a node $u \in O$ on an optimal path with $f(u) \leq \hat{f}(\alpha) < f(\beta)$, and since the algorithm uses a priority queue with the score, the node $u$ would have been selected for expansion instead of $\beta$, and the algorithm wouldn't have terminated.
 
@@ -508,8 +525,17 @@ Then, the only reason why the algorithm never terminates is because it's trapped
 which is the maximum number of times any node can be explored. Then, after at most $|V_M| \cdot m$ expansions, all nodes in $V_M$ will be in the closed set. But we've seen that no nodes outside $V_M$ can be explored. Therefore, $A^*$ must terminate.
 \end{proof}
 
+In the last section we proved that Dijkstra's algorithm always finds optimal paths when using a single goal node, but now we can easily extend this result when using a set of goal nodes.
+
+\begin{corollary}[Admissibility of Dijkstra's algorithm]
+Dijkstra's algorithm is admissible.
+\end{corollary}
+\begin{proof}
+Dijkstra's algorithm is equivalent to $A^*$ with $h(u) = 0 \  \forall u \in V$. This heuristic is clearly admissible, so by Theorem \ref{thm:astar}, Dijkstra's algorithm is admissible.
+\end{proof}
+
 %TODO reference manhattan distance which will be defined in a future chapter
-In figure \ref{fig:counterexample:admissible} we see a counterexample which proves that the converse is not true in general. Here, we are using the Manhattan distance as heuristic, which is an inadmissible heuristic if diagonal movement is allowed, since it will overestimate the true optimal distance between nodes. We can see that $A^*$ finds a path with distance $23$, which is not optimal because, in the same circumstances, Dijkstra finds a path with distance $16$.
+In figure \ref{fig:counterexample:admissible} we see a counterexample which proves that the converse of the Theorem is not true in general. Here, we are using the Manhattan distance as heuristic, which is an inadmissible heuristic if diagonal movement is allowed, since it will overestimate the true optimal distance between nodes. We can see that $A^*$ finds a path with distance $23$, which is not optimal because, in the same circumstances, Dijkstra finds a path with distance $16$.
 
 \begin{figure}
 \centering
@@ -547,22 +573,22 @@ In figure \ref{fig:node-expansion} we can see a visual comparison of the number 
 
 
 \chapter{Heuristics}
-In the previous chapter we have proved that as long as the heuristic is admissible, $A^*$ produces optimal paths. But not any admissible heuristic will give us the same performance. Take $h(u) = 0 \  \forall u \in V$ for example, which is always admissible, and the algorithm becomes equivalent to Dijkstra, as we can see in algorithm \ref{alg:dijkstra}.
+In the previous chapter we have proved that as long as the heuristic is admissible, $A^*$ produces optimal paths. But not any admissible heuristic will give us the same performance. We've seen that by taking the admissible heuristic $h(u) = 0 \  \forall u \in V$, the algorithm becomes equivalent to Dijkstra, so we haven't gained anything.
 
-We see that there is actually a class of $A^*$ algorithms, $\mathcal{A^*}$, and by selecting the g-score and h-score functions we select one of the algorithms from the class. We normally only change the h-score, and use the g-score defined previously, but notice how if we make $g(u) = 0 \  \forall u \in V$, then we get the Greedy Best-First Search algorithm seen in section \ref{section:greedy}. However, unless we explicitly say otherwise, we will always use the g-score we defined in section \ref{section:astar} for our $A^*$ algorithms.
+There is actually a class of $A^*$ algorithms, $\mathcal{A^*}$, and by selecting the g-score and h-score functions we select one of the algorithms from the class. We normally only change the h-score, and use the g-score defined previously, but notice how if we make $g(u) = 0 \  \forall u \in V$, then we get the Greedy Best-First Search algorithm seen in section \ref{section:greedy}. However, unless we explicitly say otherwise, we will always use the g-score we defined in section \ref{section:astar} for our $A^*$ algorithms.
 
-The algorithms in $\mathcal{A^*}$ are usually known as \textbf{informed} or \textbf{heuristic search algorithms}. They differ from uninformed search algorithms, like BFS or Dijkstra, mainly because they have some some information about unvisited nodes, in our case, the heuristic function.
+The algorithms in $\mathcal{A^*}$ which do use an heuristic are usually known as \textbf{informed} or \textbf{heuristic search algorithms}. They differ from uninformed search algorithms, like BFS or Dijkstra, because of the extra information they have on yet unvisited nodes.
 
-In this chapter, we will see that there exists a consistent  heuristic which also makes $A^*$ optimal, meaning that no other admissible pathfinding algorithm will expand fewer nodes. In practice, however, finding this perfect heuristic is often hard, but if we have enough information to constrain the set of accessible nodes 
+In this chapter, we will see that there are heuristics which also makes $A^*$ optimal, meaning that no other admissible pathfinding algorithm will expand fewer nodes.
 
 \section{Consistent heuristics}
 
 \begin{definition}
-Given two pathfinding algorithms $A$ and $B$, we say that $A$ \textbf{dominates} $B$ if and only if both algorithms are admissible but the set of nodes that $A$ expands is a subset of the set of nodes that $B$ expands.
+Given two admissible pathfinding algorithms $A$ and $B$, we say that $A$ \textbf{dominates} $B$ if and only if the set of nodes expanded by $A$ is a subset of the set of nodes expanded by $B$.
 \end{definition}
 
 \begin{definition}
-Given two pathfinding algorithms $A$ and $B$, we say that $A$ \textbf{strictly dominates} $B$ if and only if $A$ dominates $B$ and $B$ does not dominate $A$.
+Given two admissible pathfinding algorithms $A$ and $B$, we say that $A$ \textbf{strictly dominates} $B$ if and only if $A$ dominates $B$ and $B$ does not dominate $A$.
 \end{definition}
 
 \begin{definition}
@@ -574,10 +600,15 @@ A heuristic $h$ is said to be \textbf{consistent} or monotone if and only if, $\
 \begin{equation}
 	h(u) \leq \delta(u, v) + h(v)\label{eq:consistency}
 \end{equation}
-which is a form of the more general triangle inequality, and it also satisfies $h(\beta) = 0$ where $\beta$ is the goal node.
+and
+\begin{equation}
+	h(t) = 0 \  \forall t \in T
+\end{equation}
+where $T$ is the set of goal nodes.
+The relation shown in \ref{eq:consistency} is called the triangle inequality.
 \end{definition}
 
-Remember that the heuristic defined as $h(u) = 0 \  \forall u \in V$ is admissible. Note that it is also trivially consistent.
+For example the heuristic defined as $h(u) = 0 \  \forall u \in V$ is trivially consistent.
 
 \begin{proposition}
 \label{prop:consistent}
@@ -585,18 +616,18 @@ Given an heuristic $h$,
 \[ h \text{ is consistent} \Rightarrow h \text{ is admissible} \]
 \end{proposition}
 \begin{proof}
-Let $\beta \in V$ be the goal node of the heuristic $h$. We will prove that $\forall u \in C_\beta$, $h(u) \leq \hat{h}(u)$, by induction on the number of steps from $u$ to the goal in an optimal path $P$.
+Let $T$ be the set of goal nodes. We will prove that $\forall u \in V$ such that it has a connected preferred goal node in $T$, $h(u) \leq \hat{h}(u)$, by induction on the number of steps from $u$ to its preferred goal node in an optimal path $P$.
 
-Let $u \in C_\beta$, and let $P$ be an optimal path from $u$ to $\beta$. If there are 0 steps from $u$ to $\beta$ in $P$, then $u = \beta$, and $h(u) = h(\beta) = 0 \leq \hat{h}(u) = 0$.
+Let $t$ be a preferred goal node of $u$. If there are 0 steps from $u$ to $t$ in $P$, then $u = t$, and $h(u) = h(t) = 0 \leq \hat{h}(u) = 0$.
 
-Now suppose that $u$ is $k > 0$ steps away from $\beta$ in $P$. Let $v$ be the successor of $u$ in $P$, which is $k-1$ steps away from $\beta$. Therefore, since $h$ is consistent,
+Now suppose that $u$ is $k > 0$ steps away from $t$ in $P$. Let $v$ be the successor of $u$ in $P$, which is $k-1$ steps away from $t$. Therefore, since $h$ is consistent,
 \[ h(u) \leq \delta(u, v) + h(v) \]
 But by our inductive hypothesis, $h(v) \leq \hat{h}(v)$, and therefore
 \[ h(u) \leq \delta(u, v) + \hat{h}(v) = \hat{h}(u) \]
 since $P$ is an optimal path.
 \end{proof}
 
-The converse is not true in general, although in practice it can be difficult to find an admissible heuristic that is not also consistent. We will show this with a counterexample. Take the graph from figure \ref{fig:heuristic}, and let $C$ be the goal node. Let's define the heuristic as
+The converse is not true in general, although in practice it can be difficult to find an admissible heuristic that is not also consistent. We will show this with a counterexample. Take the graph from figure \ref{fig:heuristic}, and let $C$ be the single goal node. Let's define the heuristic as
 \begin{align*}
 h(A) &= 4\\
 h(B) &= 1\\
@@ -620,7 +651,7 @@ The heuristic is clearly admissible, since $h(A) \leq \hat{h}(A) = 4$, $h(B) \le
 \label{fig:heuristic}
 \end{figure}
 
-The following result is of special interest, since it will allow us to design $A^*$ algorithms which don't require to re-open already closed nodes, simplifying the implementation and possibly improving performance.
+The following result is of special interest, since it will allow us to design $A^*$ algorithms which don't require to re-open already closed nodes, simplifying the implementation, and will be useful in our proof of optimality.
 
 \begin{proposition}
 \label{prop:heur1}
@@ -647,6 +678,8 @@ Note that this result is equivalent to
 which contradicts the fact that $u$ was selected for expansion, when $v$ was available and should have been picked first by the algorithm.
 \end{proof}
 
+The following result is also very strong, as it tells us that nodes are closed in a monotonic order of their score value.
+
 \begin{lemma}
 \label{lemma:heur2}
 Consider the ordered set of the nodes closed by $A^*$, 
@@ -672,7 +705,7 @@ Since this is valid for any two nodes that are adjacent in the sequence, then we
 \end{proof}
 
 \section{Optimality of $A^*$}
-Choosing consistent heuristics has a practical benefit. Like we've seen in Proposition \ref{prop:heur1}, with a consistent heuristic we can avoid having to re-open nodes which were already closed. We will prove that with a consistent heuristic, $A^*$ is optimal. By proposition \ref{prop:consistent} we see that consistency is a stronger condition than admissibility, and therefore by theorem \ref{thm:astar}, the algorithm will still find optimal paths. But first, we need some preliminary results that will be used in the proof.
+Choosing consistent heuristics has a practical benefit. Like we've seen in Proposition \ref{prop:heur1}, with a consistent heuristic we can avoid having to re-open nodes which were already closed. We will prove that with a consistent heuristic, $A^*$ is also optimal. By proposition \ref{prop:consistent} we see that consistency is a stronger condition than admissibility, and therefore by theorem \ref{thm:astar}, with a consistent heuristic the algorithm will still find optimal paths.
 
 \begin{lemma}
 \label{lemma:astar-opt}
@@ -680,13 +713,13 @@ Suppose we have an admissible heuristic, and let $\alpha$ be the source node $A^
 \[ f(u) \leq \hat{f}(\alpha) \]
 \end{lemma}
 \begin{proof}
-If $\beta$ is the goal node, then $u \neq \beta$ since the algorithm has not terminated. By Lemma \ref{lemma:astar2}, at the time time the node $u$ was closed, there existed a node $v \in O$ which is part of an optimal path $P$ from $\alpha$ to $\beta$ such that $f(v) \leq \hat{f}(\alpha)$.
-But since $u$ was closed before $v$, then
+If $T$ is the set of goal nodes, then $u \not \in T$ since the algorithm has not terminated. By Lemma \ref{lemma:astar2}, at the time time the node $u$ was closed, there existed a node $v \in O$ which is part of an optimal path $P$ from $\alpha$ to a preferred goal node of $\alpha$ such that $f(v) \leq \hat{f}(\alpha)$.
+But since $u$ was closed before $v$, we have
 \[ f(u) \leq f(v) \leq \hat{f}(\alpha) \]
 \end{proof}
 
 \begin{theorem}[Optimality of $A^*$]
-Let $A$ be an admissible pathfinding algorithm no more informed than $A^*$. Let $G=(V,E)$ be any graph. Then, with an heuristic such that $h(u) = \hat{h}(u) \forall u \in V$, there exists an algorithm $A^* \in \mathcal{A^*}$ such that every node $u \in V$ expanded by $A^*$ is also expanded by $A$.
+Let $A$ be an admissible pathfinding algorithm no more informed than $A^*$. Let $G=(V,E)$ be any graph.
 \end{theorem}
 \begin{proof}
 Let $G = (V, E)$ be a graph, and let $\alpha, \beta \in V$ be two connected nodes. We will execute the pathfinding algorithms with source node $\alpha$ and goal node $\beta$. Let $K$ be the set of nodes expanded by $A$ in its execution, and let $P$ be the optimal path found by $A$. We will construct the heuristic that satisfies the theorem recursively.
@@ -711,6 +744,7 @@ Iterative Deepening $A^*$, or $\bm{IDA^*}$, is a variant of $A^*$ based on itera
 In this appendix we will briefly explain the data structures we used in our algorithms. We will only explain them on the interface level, and give the complexity of each of its operations. There are many different ways to implement these structures, but the details on the implementation and justification of the complexity are out of the scope of this article, but the information can be found in \emph{Introduction to Algorithms} by Thomas H. Cormen \textit{et al.}, or any other data structures or algorithmics book.
 
 \section{Queue}
+\label{annex:queue}
 In algorithms \ref{alg:bfs} and \ref{alg:bfs_early_exit} we use a queue. A queue has two methods that modify the data in the structure:
 \begin{itemize}
 \item \emph{enqueue}: Adds an item at the back of the queue.
@@ -724,6 +758,7 @@ We also have a method, \emph{front}, which returns the item in the first positio
 All these methods have a time complexity of $O(1)$.
 
 \section{Priority Queue}
+\label{annex:priorityqueue}
 In algorithms \ref{alg:dijkstra}, \ref{alg:greedy} and \ref{alg:astar} we use a priority queue. The priority queue works similarly to a queue, but each item also has a priority. This priority determines the order in which the items will be removed from the queue. In all our algorithms, we used a minimum priority queue, meaning that we associated a priority value to each item, and the item with minimum value would be served first. This is crucial for the correct functionality of all of our algorithms that use a priority queue. In Dijkstra, we used the current best distance to each node as the priority. In Greedy Best-First Search, we used the heuristic. And in $A^*$ we used the score function.
 
 We use the following methods from the priority queue:
