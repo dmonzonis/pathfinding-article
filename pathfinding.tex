@@ -850,6 +850,36 @@ Observe that equation \ref{eq:chebyshev} is obtained by setting $D = D' = 1$ in 
 In all these cases, we could use the Euclidean distance between the points as heuristics, which is admissible, but the alternatives presented always dominate over it by Theorem \ref{thm:dominating-heuristic}.
 
 
+\chapter{Pathfinding simulator}
+
+In this brief chapter we will discuss the simulator built for this article, its options and implementation. As we already know, our simulator uses a grid graph. For the graphical interface, we have used the Qt library. The interface has a central widget where the grid graph is represented, and below it are some options to select the algorithm being used and its behaviour. There is also a menu bar from where we can do other things like save or load maps to a file.
+
+In the grid, nodes are usually referred to as tiles. By left-clicking on a tile, we paint it with the currently selected weight or tile type. We have pre-defined some tile types (wall, floor, forest and water), and an option to create a custom tile type with a weight set by the user. The weight of the selected tile type is shown next to the tile type selection combo box. The weight of wall tiles is $\infty$, so painting a node with a tile type of wall is equivalent to 'removing' or disconnecting the node from the grid. We can think of painting a tile with some weight as setting the weights of the edges that go from adjacent tiles (neighbours) to that tile.
+
+The algorithms implemented are the ones we have presented in chapter \ref{chapter:algorithms}, and the heuristics which are available for the algorithms that use one, namely $A^*$ and Greedy Best-First Search, are the ones presented in section \ref{section:heuristics-grid}.
+
+The selected algorithm will execute itself interactively each time the grid changes, showing with a yellow path the path found by the algorithm from the source to the goal node, if it exists. This path will be an optimal path if and only if the algorithm used is admissible.
+
+There's an option to show the cost to each of the nodes that the algorithm examined that the algorithm had computed by the time it terminated. This can be especially useful to get an idea of number and the position of the nodes that have been expanded in its execution, and the number in the goal tile will be the optimal distance from the source, as long as the algorithm is admissible.
+
+We can drag and drop the source and goal tiles (represented with a red square and a red cross respectively) into any other tile with the right mouse button. Using the mouse wheel, we can zoom in and out on the map, and by dragging with the middle mouse button, we can pan the view.
+
+There are also different tools or modes for painting tiles, introduced only for the sake of simplicity. With the pencil tool, we paint the tiles that are under the cursor. The bucket tool paints all tiles in an enclosed region where the weights are the same as the one where we click initially. The line tool allows to create approximations of lines by dragging with the left mouse button from an initial point to an end point, using Bresenhaum's algorithm\footnote{\DEBUGComment{Add cite to reference, or talk about it in the appendix?}}. Finally, the rectangle tool allows us to paint a filled rectangle by definind two opposing corners, using the left mouse button.
+
+We can enable or disable diagonal movement with the simple click of a checkbox. We can also enable or disable corner movement, which means moving diagonally between two tiles when there is a wall tile which is adjacent to both tiles.
+
+The simulator has the option to save the current map to a file, as well as to load a map from a file. The format used is a simple CSV file. The first line has two values, corresponding the width and height of the grid. The second line has four values. The first pair of values represents the coordinate of the top-left corner of the grid, $(x_0, y_0)$, and the second pair represents the coordinate of the bottom-right corner, $(x_1, y_1)$. The rest of the lines (which must equal the height in number), hold a certain number of values (which must equal the width in number) representing the weight of each tile.
+
+Using this simple format means that we can also generate maps from another program using the same format, and then load them into the simulator. If the map used is smaller than the tiles the view can show, the tiles outside of the boundaries of the map are shown as walls.
+
+\begin{figure}
+\centering
+\includegraphics[width=1\linewidth]{pathfinding-simulator}
+\caption{A screenshot showing the GUI of the pathfinding simulator. In this example, we are using the $A^*$ algorithm with the Chebyshev distance as heuristic, and with diagonal movement enabled. White tiles have cost 1, black tiles are walls (cost $\infty$), green tiles have cost 2 and blue tiles have cost 5.}
+\label{fig:pathfinding-simulator}
+\end{figure}
+
+
 \chapter{$A^*$ variants}
 
 In the last chapters we have mainly focused on the $A^*$ algorithm. But the addition rule used by the score, $f = g + h$, is not the only way to use the heuristic information we have, and we could also tweak the way nodes are expanded, giving rise to new algorithms, fundamentally different from $A^*$, but still close enough to be considered part of the same family. In this chapter we will present some variants of the $A^*$ algorithm, explaining how they fundamentally change from the $A^*$ we have seen, and the benefits that using them may give us.
