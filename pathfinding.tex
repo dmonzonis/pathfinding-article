@@ -402,7 +402,7 @@ Given a source node $\alpha \in V$ and a set of goal nodes $T$, let $\hat{f}(u) 
 \hat{h}(u) = \min_{t \in T} \delta(u, t)
 \end{align*}
  
-Note that for any node $v$ in an optimal path between $\alpha$ and a preferred goal node $t$ of $\alpha$, $\hat{f}(v) = \hat{f}(\alpha) = \hat{f}(t)$.
+Note that for any node $v$ in an optimal path between $\alpha$ and a preferred goal node $t$ of $\alpha$, $\hat{f}(v) = \hat{f}(\alpha) = \hat{f}(t) = \delta(\alpha, t)$. We will usually write this distance as $f^*$.
 
 Let $g(u)$ and $h(u)$ be functions which give us estimates for $\hat{g}(u)$ and $\hat{h}(u)$ respectively.
 
@@ -489,7 +489,7 @@ Now, $g(v) \leq g(n^*) + w((n^*, v))$ by the definition of $g$, and since $n^* \
 
 \begin{lemma}
 \label{lemma:astar2}
-Suppose the heuristic used by $A^*$ is admissible, and suppose $A^*$ has not finished its execution yet. Then, for any optimal path $P$ from $\alpha$ to a preferred goal node of $\alpha$, $\exists v \in O$ which is part of $P$ such that $f(v) \leq \hat{f}(\alpha)$.
+Suppose the heuristic used by $A^*$ is admissible, and suppose $A^*$ has not finished its execution yet. Then, for any optimal path $P$ from $\alpha$ to a preferred goal node of $\alpha$, $\exists v \in O$ which is part of $P$ such that $f(v) \leq f^*$.
 \end{lemma}
 \begin{proof}
 By lemma \ref{lemma:astar1}, $\exists v$ in $P$ with $g(v) = \hat{g}(v)$. Therefore, by the definition of the score function and the hypothesis,
@@ -498,7 +498,25 @@ f(v) &= g(v) + h(v)\\
 &= \hat{g}(v) + h(v)\\
 &\leq \hat{g}(v) + \hat{h}(v) = \hat{f}(v)
 \end{align*}
-Since $P$ is an optimal path, $\hat{f}(v) = \hat{f}(\alpha) \  \forall v$ in the path $P$, which proves the lemma.
+Since $P$ is an optimal path, $\hat{f}(v) = f^* \  \forall v$ in the path $P$, which proves the lemma.
+\end{proof}
+
+\begin{proposition}
+\label{prop:astar-termination}
+Let $G = (V, E)$ be a graph with strictly positive weights, which can be infinite. If there exists a path from a source node $\alpha$ to a goal node in $T$, then $A^*$ terminates for every heuristic such that $h(u) \geq 0 \  \forall u \in V$.
+\end{proposition}
+\begin{proof}
+Let
+\[ \epsilon = \min_{e \in E} w(e) \]
+By hypothesis, $\epsilon > 0$. For any node $u$ further than $M = f^*/\epsilon$ steps from $\alpha$, we have
+\[ f(u) \geq g(u) \geq \hat{g}(u) > M \epsilon = f^* \]
+where the last inequality comes from our definition of the g-score.
+
+By Lemma \ref{lemma:astar2}, we see that there will always be a node $v \in O$ on an optimal path from the source to one of its preferred goal nodes such that $f(v) \leq f^* < f(u)$, so the algorithm will always pick it first, and therefore no nodes further than $M$ steps from $\alpha$ are ever explored.
+
+Then, the only reason why the algorithm never terminates is because it's trapped in a loop where it repeatedly explores nodes that are less than $M$ steps away from $\alpha$. Let $V_M$ be the set of nodes accessible within $M$ or less steps from $\alpha$. Consider any node $u \in V_M$. There are only a finite number of paths from $\alpha$ to $u$ that only pass through nodes in $V_M$, and therefore $u$ can only be explored a finite number of times. We call this number $m_u$. Let
+\[ m = \max_{u \in V_M} m_u \]
+which is the maximum number of times any node can be explored. Then, after at most $|V_M| \cdot m$ expansions, all nodes in $V_M$ will be in the closed set. But we've seen that no nodes outside $V_M$ can be explored. Therefore, $A^*$ must terminate.
 \end{proof}
 
 \begin{theorem}[Admissibility of $A^*$]
@@ -506,23 +524,13 @@ Since $P$ is an optimal path, $\hat{f}(v) = \hat{f}(\alpha) \  \forall v$ in the
 If the heuristic is admissible, then $A^*$ is admissible.
 \end{theorem}
 \begin{proof}
-There are only three possible cases in which $A^*$ doesn't find an optimal path: the algorithm terminates at a node which is not a goal node, terminates at a goal node but the path found isn't optimal, or fails to terminate at all. Let's consider the three cases separately.
+There are only three possible cases in which $A^*$ doesn't find an optimal path: the algorithm terminates at a node which is not a goal node, terminates at a goal node but the path found isn't optimal, or fails to terminate at all. We've already seen in Proposition \ref{prop:astar-termination} that $A^*$ always terminates, even if the heuristic is not admissible. Let's consider the other two cases separately.
 
 Consider the case where the algorithm terminates at a node which is not a goal node. Since we are using the early exit condition, which makes the algorithm terminate whenever it expands a goal node, the only possible way that the algorithm terminates without having found a goal node is if there wasn't any goal node in the open set to start with, or equivalently, no goal node is not connected to the start node, which contradicts our hypothesis.
 
 Consider the case where the algorithm terminates at a goal node, but doesn't find an optimal path. Let $\beta$ be the goal node at which the algorithm terminates. Note that since the heuristic is admissible
 \[ 0 \leq h(\beta) \leq \hat{h}(\beta) = 0 \  \Rightarrow \  h(\beta) = 0 \]
-In this case, by the time the algorithm terminates, we have $f(\beta) = g(\beta) > \hat{f}(\alpha)$ because the path found is not optimal. But by lemma \ref{lemma:astar2}, just before termination, there existed a node $u \in O$ on an optimal path with $f(u) \leq \hat{f}(\alpha) < f(\beta)$, and since the algorithm uses a priority queue with the score, the node $u$ would have been selected for expansion instead of $\beta$, and the algorithm wouldn't have terminated.
-
-Finally, consider the case where the algorithm fails to terminate. Remember that in $A^*$ we only work with graphs in which weights are strictly positive. Let 
-\[ \epsilon = \min_{e \in E} w(e) > 0 \]
-For any node $u$ further than $M = \hat{f}(\alpha) / \epsilon$ steps from $\alpha$, we have
-\[ f(u) \geq g(u) \geq \hat{g}(u) > M \epsilon = \hat{f}(\alpha) \]
-By lemma \ref{lemma:astar2}, we see that there is a node $v \in O$ on an optimal path such that $f(v) \leq \hat{f}(\alpha) < f(u)$, so the algorithm will always pick it first, and therefore no nodes further than $M$ steps from $\alpha$ are ever explored.
-
-Then, the only reason why the algorithm never terminates is because it's trapped in a loop where it repeatedly explores nodes that are less than $M$ steps away from $\alpha$. Let $V_M$ be the set of nodes accessible within $M$ or less steps from $\alpha$. Consider any node $u \in V_M$. There are only a finite number of paths from $\alpha$ to $u$ that only pass through nodes in $V_M$, and therefore $u$ can only be explored a finite number of times. We call this number $m_u$. Let
-\[ m = \max_{u \in V_M} m_u \]
-which is the maximum number of times any node can be explored. Then, after at most $|V_M| \cdot m$ expansions, all nodes in $V_M$ will be in the closed set. But we've seen that no nodes outside $V_M$ can be explored. Therefore, $A^*$ must terminate.
+In this case, by the time the algorithm terminates, we have $f(\beta) = g(\beta) > f^*$ because the path found is not optimal. But by lemma \ref{lemma:astar2}, just before termination, there existed a node $u \in O$ on an optimal path with $f(u) \leq f^* < f(\beta)$, and since the algorithm uses a priority queue with the score, the node $u$ would have been selected for expansion instead of $\beta$, and the algorithm wouldn't have terminated.
 \end{proof}
 
 In the last section we proved that Dijkstra's algorithm always finds optimal paths when using a single goal node, but now we can easily extend this result when using a set of goal nodes.
@@ -575,25 +583,13 @@ In figure \ref{fig:node-expansion} we can see a visual comparison of the number 
 \chapter{Heuristics}
 In the previous chapter we have proved that as long as the heuristic is admissible, $A^*$ produces optimal paths. But not any admissible heuristic will give us the same performance. We've seen that by taking the admissible heuristic $h(u) = 0 \  \forall u \in V$, the algorithm becomes equivalent to Dijkstra, so we haven't gained anything.
 
-There is actually a class of $A^*$ algorithms, $\mathcal{A^*}$, and by selecting the g-score and h-score functions we select one of the algorithms from the class. We normally only change the h-score, and use the g-score defined previously, but notice how if we make $g(u) = 0 \  \forall u \in V$, then we get the Greedy Best-First Search algorithm seen in section \ref{section:greedy}. However, unless we explicitly say otherwise, we will always use the g-score we defined in section \ref{section:astar} for our $A^*$ algorithms.
+$A^*$ is part of a class of algorithms, which we will call $\mathcal{A^*}$, and by selecting the g-score and h-score functions we select one of the algorithms from the class. We normally only change the h-score, and use the g-score defined previously, but notice how if we make $g(u) = 0 \  \forall u \in V$, then we get the Greedy Best-First Search algorithm seen in section \ref{section:greedy}. However, unless we explicitly say otherwise, we will always use the g-score we defined in section \ref{section:astar} for our $A^*$ algorithms.
 
-The algorithms in $\mathcal{A^*}$ which do use an heuristic are usually known as \textbf{informed} or \textbf{heuristic search algorithms}. They differ from uninformed search algorithms, like BFS or Dijkstra, because of the extra information they have on yet unvisited nodes.
+The class $\mathcal{A^*}$ is a subclass of a larger set of algorithms which are usually known as \textbf{informed} or \textbf{heuristic search algorithms}.
 
-In this chapter, we will see that there are heuristics which also makes $A^*$ optimal, meaning that no other admissible pathfinding algorithm will expand fewer nodes.
+In this chapter, we will see that there are heuristics which also make $A^*$ optimal, meaning that we can reduce the number of nodes expanded with respect to other algorithms of $\mathcal{A^*}$.
 
 \section{Consistent heuristics}
-
-\begin{definition}
-Given two admissible pathfinding algorithms $A$ and $B$, we say that $A$ \textbf{dominates} $B$ if and only if the set of nodes expanded by $A$ is a subset of the set of nodes expanded by $B$.
-\end{definition}
-
-\begin{definition}
-Given two admissible pathfinding algorithms $A$ and $B$, we say that $A$ \textbf{strictly dominates} $B$ if and only if $A$ dominates $B$ and $B$ does not dominate $A$.
-\end{definition}
-
-\begin{definition}
-Given a class of algorithms $\bar{A}$, we say that $A \in \bar{A}$ is \textbf{optimal} if and only if $A$ dominates every member of $\bar{A}$.
-\end{definition}
 
 \begin{definition}
 A heuristic $h$ is said to be \textbf{consistent} or monotone if and only if, $\forall u, v \in V$,
@@ -654,7 +650,7 @@ The heuristic is clearly admissible, since $h(A) \leq \hat{h}(A) = 4$, $h(B) \le
 The following result is of special interest, since it will allow us to design $A^*$ algorithms which don't require to re-open already closed nodes, simplifying the implementation, and will be useful in our proof of optimality.
 
 \begin{proposition}
-\label{prop:heur1}
+\label{prop:closed-optimal}
 With a consistent heuristic, any node $u$ closed by $A^*$ satisfies
 \[ g(u) = \hat{g}(u) \]
 \end{proposition}
@@ -678,19 +674,21 @@ Note that this result is equivalent to
 which contradicts the fact that $u$ was selected for expansion, when $v$ was available and should have been picked first by the algorithm.
 \end{proof}
 
+By our definition of the g-score, Proposition \ref{prop:closed-optimal} implies that when a node is closed, the algorithm has found an optimal path from the source node to the closed node.
+
 The following result is also very strong, as it tells us that nodes are closed in a monotonic order of their score value.
 
 \begin{lemma}
-\label{lemma:heur2}
+\label{lemma:order}
 Consider the ordered set of the nodes closed by $A^*$, 
 \[ \{ \alpha = n1, n2, \dots, n_m \} \]
 ordered by the time they were closed by the algorithm. If the heuristic is consistent, then, for $p, q \in \{ 1, \dots, m \}$,
 \[ p \leq q \Rightarrow f(n_p) \leq f(n_q) \]
 \end{lemma}
 \begin{proof}
-Let $u$ be a closed node, and $v$ the node closed just before $u$. Suppose the optimal path $P$ computed by $A^*$ from the source node $\alpha$ to $u$ does not go through $v$. This means that the algorithm selected $v$ for expansion when $u$ was also available, which means $f(v) \leq f(u)$, proving the lemma.
+Let $u$ be a closed node, and $v$ the node closed just before $u$. Suppose the optimal path $P$ computed by $A^*$ from the source node $\alpha$ to $u$ does not go through $v$. This means that the algorithm selected $v$ for expansion when $u$ was also available, which means $f(v) \leq f(u)$, proving the Lemma.
 
-Now suppose that the optimal path to $u$, $P$, does go through $v$. Then, $\hat{g}(u) = \hat{g}(v) + \delta(v, u)$. By Proposition \ref{prop:heur1}, we know that $g(u) = \hat{g}(u)$ and $g(v) = \hat{g}(v)$. Then,
+Now suppose that the optimal path to $u$, $P$, does go through $v$. Then, $\hat{g}(u) = \hat{g}(v) + \delta(v, u)$. By Proposition \ref{prop:closed-optimal}, we know that $g(u) = \hat{g}(u)$ and $g(v) = \hat{g}(v)$. Then,
 \begin{align*}
 f(u) &= g(u) + h(u)\\
 &= \hat{g}(u) + h(u)\\
@@ -704,27 +702,59 @@ Since this is valid for any two nodes that are adjacent in the sequence, then we
 \[ p \leq q \Rightarrow f(n_p) \leq f(n_q) \]
 \end{proof}
 
+
 \section{Optimality of $A^*$}
-Choosing consistent heuristics has a practical benefit. Like we've seen in Proposition \ref{prop:heur1}, with a consistent heuristic we can avoid having to re-open nodes which were already closed. We will prove that with a consistent heuristic, $A^*$ is also optimal. By proposition \ref{prop:consistent} we see that consistency is a stronger condition than admissibility, and therefore by theorem \ref{thm:astar}, with a consistent heuristic the algorithm will still find optimal paths.
+Choosing consistent heuristics has a practical benefit. Like we've seen in Proposition \ref{prop:closed-optimal}, with a consistent heuristic we can avoid having to re-open nodes which were already closed. We will prove that with a consistent heuristic, $A^*$ is also optimal. By proposition \ref{prop:consistent} we see that consistency is a stronger condition than admissibility, and therefore by theorem \ref{thm:astar}, with a consistent heuristic the algorithm will still find optimal paths.
+
+\begin{definition}
+Given two admissible algorithms $A$ and $B$, we say that $A$ \textbf{dominates} $B$ if and only if the set of nodes expanded by $A$ is a subset of the set of nodes expanded by $B$.
+\end{definition}
+
+\begin{definition}
+Given two admissible algorithms $A$ and $B$, we say that $A$ \textbf{strictly dominates} $B$ if and only if $A$ dominates $B$ and $B$ does not dominate $A$.
+\end{definition}
+
+\begin{definition}
+Given a class of algorithms $\bar{A}$, we say that $A \in \bar{A}$ is \textbf{optimal} if and only if $A$ dominates every member of $\bar{A}$.
+\end{definition}
+
+\begin{definition}
+Given an heuristic search algorithm $A$, we say that $A$ is no more informed than $A^*$ if $A$ has access to the same heuristic information as $A^*$, but placing no restriction in how it uses it, and doesn't have any extra information that $A^*$ does not have about unvisited nodes.
+\end{definition}
+
+We can then treat the heuristic as a parameter of the graph, where each node $u$ has an assigned value $h(u)$, and all heuristic search algorithms no more informed than $A^*$ have access to this information.
+
+We will also assume that all the algorithms discussed use a sequential approach to expanding nodes, only expanding nodes that have previously been seen from another node, and starting the expansion on the source node $\alpha$.
+
 
 \begin{lemma}
 \label{lemma:astar-opt}
-Suppose we have an admissible heuristic, and let $\alpha$ be the source node $A^*$. Suppose that $A^*$ has not terminated yet. Then, for every closed node $u$,
-\[ f(u) \leq \hat{f}(\alpha) \]
+Suppose we have an admissible heuristic, and suppose that $A^*$ has not terminated yet. Then, for every closed node $u$,
+\[ f(u) \leq f^* \]
 \end{lemma}
 \begin{proof}
-If $T$ is the set of goal nodes, then $u \not \in T$ since the algorithm has not terminated. By Lemma \ref{lemma:astar2}, at the time time the node $u$ was closed, there existed a node $v \in O$ which is part of an optimal path $P$ from $\alpha$ to a preferred goal node of $\alpha$ such that $f(v) \leq \hat{f}(\alpha)$.
+If $T$ is the set of goal nodes, then $u \not \in T$ since the algorithm has not terminated. By Lemma \ref{lemma:astar2}, at the time time the node $u$ was closed, there existed a node $v \in O$ which is part of an optimal path $P$ from the source node $\alpha$ to a preferred goal node of $\alpha$ such that $f(v) \leq f^*$.
 But since $u$ was closed before $v$, we have
-\[ f(u) \leq f(v) \leq \hat{f}(\alpha) \]
+\[ f(u) \leq f(v) \leq f^* \]
 \end{proof}
 
+\begin{proposition}
+\label{prop:surely}
+If the heuristic is consistent, then $A^*$ expands every node reachable from the source node $\alpha$ with optimal distance strictly bounded by $f^*$.
+\end{proposition}
+\begin{proof}
+Let $t$ be the goal node at which $A^*$ terminates its execution. Since $A^*$ is admissible by hypothesis, then $f(t) = f^*$. Since by Lemma \ref{lemma:order} $A^*$ closes nodes in non-decreasing order of their score, there can't exist a non-closed node $u$ with $f(u) < f(t) = f^*$. Therefore, all such nodes must have been closed by the time the algorithm closes $t$, and by Proposition \ref{prop:closed-optimal}, the distance found by the algorithm from the source node is optimal. Then, for any closed node $u$ with score strictly less than $f^*$, $f(u) = g(u) + h(u) = \hat{g}(u) + h(u) < f^*$ which implies $\hat{g}(u) < f^*$.
+\end{proof}
+
+\begin{definition}
+We say that every node expanded with the property from Proposition \ref{prop:surely} is \textbf{surely expanded} by $A^*$. Given a source node $\alpha$, we will write the set of nodes surely expanded by $A^*$, that is, with its optimal distance from the source strictly bounded by $f^*$, as $N_{f^*}$.
+\end{definition}
+
 \begin{theorem}[Optimality of $A^*$]
-Let $A$ be an admissible pathfinding algorithm no more informed than $A^*$. Let $G=(V,E)$ be any graph.
+Let $A$ be an admissible algorithm no more informed than $A^*$. Let $G=(V,E)$ be any graph.
 \end{theorem}
 \begin{proof}
-Let $G = (V, E)$ be a graph, and let $\alpha, \beta \in V$ be two connected nodes. We will execute the pathfinding algorithms with source node $\alpha$ and goal node $\beta$. Let $K$ be the set of nodes expanded by $A$ in its execution, and let $P$ be the optimal path found by $A$. We will construct the heuristic that satisfies the theorem recursively.
-
-Let $h$ be an heuristic, which we use in $A^*$ as h-score. If with this heuristic all the nodes expanded by $A^*$ are in $K$ then the proof is finished. Suppose that there are nodes expanded by $A^*$ that are not in $K$. Let $u$ be the first node expanded by $A^*$ such that $u \not \in K$. By Lemma \ref{lemma:astar-opt}, we know that $f(u) \leq \hat{f}(\alpha)$. Suppose that $f(u) < \hat{f}(\alpha) = \hat{f}(\beta)$.
+%TODO
 \end{proof}
 
 
