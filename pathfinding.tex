@@ -58,6 +58,7 @@ Many problems in the fields of science, mathematics and engineering can be gener
 For most of the examples in the article we will be using a grid graph, represented by a tiled 2D map, in which each tile (or node) is connected to its adjacent tiles. In the map, each tile can have a different weight, or be a wall, which is impassable. This notion of weighted nodes and walls can be translated to the structure of a weighted directed graph by thinking of the weights of the tiles as the weights of the edges that connect adjacent tiles to it. Walls can be thought of as nodes that are not connected (or just non-existent) to any other node, and therefore not reachable from other nodes. A pathfinding simulator was built for this article to help illustrate these examples.
 
 \chapter{The $A^*$ algorithm}
+\label{chapter:algorithms}
 The $A^*$ algorithm is a very popular algorithm used in many applications to find optimal paths between points. The algorithm works on graphs, a structure well studied in graph theory.
 
 \begin{definition}
@@ -442,9 +443,6 @@ When a node is explored, its g-score, and thus its score will be updated. The ps
 		\State \Return ReconstructPath(previous,$\alpha$,$u$)
 	\EndIf
 	\For {$v \in u$.neighbours()}
-		\If {$v \in S$}
-			\Continue \Comment{Already explored node}
-		\EndIf
 		\State alt $\gets g[u] + w((u, v))$
 		\If {alt $< g[v]$}
 			\State $g[v] \gets$ alt \Comment{Update the g-score}
@@ -674,7 +672,7 @@ Note that this result is equivalent to
 which contradicts the fact that $u$ was selected for expansion, when $v$ was available and should have been picked first by the algorithm.
 \end{proof}
 
-By our definition of the g-score, Proposition \ref{prop:closed-optimal} implies that when a node is closed, the algorithm has found an optimal path from the source node to the closed node.
+By our definition of the g-score, Proposition \ref{prop:closed-optimal} implies that when a node is closed, the algorithm has found an optimal path from the source node to the closed node. We can modify our $A^*$ code so that, when examining the neighbours of the node we are expanding, we check if the neighbour is already closed, and if it is, skip examining it again, like we did in Dijkstra. We will leave it to the reader to re-write the pseudocode with this new condition, but note that it is only valid if we use consistent heuristics.
 
 The following result is also very strong, as it tells us that nodes are closed in a monotonic order of their score value.
 
@@ -794,8 +792,19 @@ Suppose there was more than one goal node in the premises of Theorem \ref{thm:do
 
 Note that, in general, it is very difficult to find an heuristic such that $h(u) = \hat{h}(u) \  \forall u \in V$, so we usually have to settle for some good lower bound by approximating this value.
 
-\section{Heuristics on grid maps}
-Our simulator uses a grid map, so it is convenient to talk about some of the different heuristics we could use in this type of problem. In a grid graph, we have nodes uniquely identified by their coordinates, $(x, y)$, where $x,y \in \mathbb{Z}$.
+\begin{theorem}
+\label{thm:exact-heuristics-consistency}
+Let $G = (V, E)$ be a graph, and consider a single goal node $t$. Then,
+\[ h(u) = \hat{h}(u) \  \forall u \in V \Rightarrow h \text{ is consistent} \]
+\end{theorem}
+\begin{proof}
+If $h = \hat{h}$, then $\forall u, v \in V$, we have $h(u) = \delta(u, t)$ and $h(v) = \delta(v, t)$.
+The consistency equation immediately follows, since $\delta(u, t) \leq \delta(u, v) + \delta(v, t)$, the case of equality being when $v$ is part of an optimal path between $u$ and $t$.
+\end{proof}
+
+\section{Heuristics on grid graphs}
+\label{section:heuristics-grid}
+Our simulator uses a grid graph, so it is convenient to talk about some of the different heuristics we could use in this type of problem. In a grid graph, we have nodes uniquely identified by their coordinates, $(x, y)$, where $x,y \in \mathbb{Z}$.
 
 \begin{definition}
 The \textbf{Manhattan distance} between two nodes with coordinates $(x_0, y_0)$ and $(x_1, y_1)$ is defined as
@@ -804,7 +813,7 @@ The \textbf{Manhattan distance} between two nodes with coordinates $(x_0, y_0)$ 
 \end{equation}
 \end{definition}
 
-If the grid only allows horizontal and vertical movement, then it's easy to see that the Manhattan distance between any two nodes $u, v$ is actually $\delta(u, v)$. Therefore, a good heuristic in this case is to use the Manhattan distance from any node $u$ to the goal node, since in this case $h(u) = \hat{h}(u)$.
+If the grid only allows horizontal and vertical movement, then it's easy to see that the Manhattan distance between any two nodes $u, v$ is actually $\delta(u, v)$. Therefore, a good heuristic in this case is to use the Manhattan distance from any node $u$ to the goal node, since in this case $h(u) = \hat{h}(u)$. By Theorem \ref{thm:exact-heuristics-consistency}, this heuristic will also be consistent.
 
 \begin{definition}
 The \textbf{Chebyshev distance} between two nodes with coordinates $(x_0, y_0)$ and $(x_1, y_1)$ is defined as
@@ -813,7 +822,7 @@ The \textbf{Chebyshev distance} between two nodes with coordinates $(x_0, y_0)$ 
 \end{equation}
 \end{definition}
 
-If the grid allows diagonal movement, and moving diagonally has the same base cost as moving horizontally or vertically, then the Chebyshev distance between any two nodes $u, v$ is $\delta(u, v)$, and we can use it as the heuristic to get optimal efficiency.
+If the grid allows diagonal movement, and moving diagonally has the same base cost as moving horizontally or vertically, then the Chebyshev distance between any two nodes $u, v$ is $\delta(u, v)$ and is also a consistent heuristic by Theorem \ref{thm:exact-heuristics-consistency}.
 
 Remember that, as we saw in figure \ref{fig:counterexample:admissible}, the heuristic that uses the Manhattan distance is not admissible in a grid that allows diagonal movement, and as a result the algorithm will not be admissible.
 
@@ -848,6 +857,8 @@ In the last chapters we have mainly focused on the $A^*$ algorithm. But the addi
 
 \section{$IDA^*$}
 Iterative Deepening $A^*$, or $\bm{IDA^*}$, is a variant of $A^*$ based on iterative deepening search, which is a modification of Depth-First Search that finds the best depth limit. %TODO talk about DFS in the annex
+
+%TODO jump-point searc, beam search, Theta*, D*...
 
 
 %TODO make chapter on tie-breaking rules
