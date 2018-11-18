@@ -719,13 +719,12 @@ Given a class of algorithms $\bar{A}$, we say that $A \in \bar{A}$ is \textbf{op
 \end{definition}
 
 \begin{definition}
-Given an heuristic search algorithm $A$, we say that $A$ is no more informed than $A^*$ if $A$ has access to the same heuristic information as $A^*$, but placing no restriction in how it uses it, and doesn't have any extra information that $A^*$ does not have about unvisited nodes.
+Given an heuristic search algorithm $A$, we say that $A$ is \textbf{no more informed} than $A^*$ if $A$ has access to the same heuristic information as $A^*$, but placing no restriction in how it uses it, and doesn't have any extra information that $A^*$ does not have about unvisited nodes.
 \end{definition}
 
 We can then treat the heuristic as a parameter of the graph, where each node $u$ has an assigned value $h(u)$, and all heuristic search algorithms no more informed than $A^*$ have access to this information.
 
 We will also assume that all the algorithms discussed use a sequential approach to expanding nodes, only expanding nodes that have previously been seen from another node, and starting the expansion on the source node $\alpha$.
-
 
 \begin{lemma}
 \label{lemma:astar-opt}
@@ -751,10 +750,26 @@ We say that every node expanded with the property from Proposition \ref{prop:sur
 \end{definition}
 
 \begin{theorem}[Optimality of $A^*$]
-Let $A$ be an admissible algorithm no more informed than $A^*$. Let $G=(V,E)$ be any graph.
+Let $A$ be an admissible algorithm no more informed than $A^*$, and let $h$ be a consistent heuristic used by the algorithms. Then, $A$ will always expand all nodes surely expanded by $A^*$.
 \end{theorem}
 \begin{proof}
-%TODO
+Let $G = (V, E)$ be a graph, and $\alpha \in V$ the source node with which we will execute the algorithms, and $T$ the set of goal nodes. Let $u$ be a node surely expanded by $A^*$, that is, $u \in N_{f^*}$. Suppose $A$ also halts when expanding a node with cost $f^*$.
+
+Suppose $A$ does not expand $u$. Now, consider a new graph $G' = (V', E')$ which we create by taking $G$, and adding a new goal node $t$ and an edge $e = (u, t)$ with cost $w(e) = h(u) + \Delta$ where
+\[ \Delta = \frac{1}{2} (f^* - \max \{ f(v) \mid v \in N_{f^*} \}) > 0 \]
+Then, $V' = V \cup \{ t 	\}$ and $E' = E \cup \{ e \}$.
+
+In this new graph, we see that when $A^*$ expands $u$, it will assign $t$ with a score of
+\[ f(t) = g(t) + h(t) = g(t) = g(u) + w(e) = f(u) + \Delta \leq f^* - \Delta < f^* \]
+Therefore, there will be a new solution path with cost at most $f^* - \Delta$, which will be found by $A^*$.
+
+We have to see that in this new graph $G'$, consistency is maintained. Since we left the h-score unchanged for the nodes in $G$, consistency still holds for any pair of values in $G$ by hypothesis. Then, we only have to check that consistency holds for any pair of values containing the added node $t$. Since $t$ is a goal node, $h(t) = 0$, and all we have to check is that $\forall v \in V \  h(v) \leq \delta(v, t)$.
+
+Suppose that $\exists v \in V$ for which $h(v) > \delta(v, t)$. Then,
+\[ h(v) > \delta(v, t) = \delta(v, u) + w(e) = \delta(v, u) + h(u) + \Delta \]
+which violates the heuristic's consistency in $G$, since $\Delta > 0$.
+
+Since $A$ is not more informed than $A^*$, it will behave the same way in $G'$ as it did in $G$, therefore not expanding $u$ and failing to find the path to $t$ with cost lower than $f^*$, which contradicts the fact that $A$ is admissible.
 \end{proof}
 
 
