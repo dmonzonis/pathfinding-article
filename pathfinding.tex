@@ -715,10 +715,6 @@ Given two admissible algorithms $A$ and $B$, we say that $A$ \textbf{strictly do
 \end{definition}
 
 \begin{definition}
-Given a class of algorithms $\bar{A}$, we say that $A \in \bar{A}$ is \textbf{optimal} if and only if $A$ dominates every member of $\bar{A}$.
-\end{definition}
-
-\begin{definition}
 Given an heuristic search algorithm $A$, we say that $A$ is \textbf{no more informed} than $A^*$ if $A$ has access to the same heuristic information as $A^*$, but placing no restriction in how it uses it, and doesn't have any extra information that $A^*$ does not have about unvisited nodes.
 \end{definition}
 
@@ -750,6 +746,7 @@ We say that every node expanded with the property from Proposition \ref{prop:sur
 \end{definition}
 
 \begin{theorem}[Optimality of $A^*$]
+\label{thm:astar-optimality}
 Let $A$ be an admissible algorithm no more informed than $A^*$, and let $h$ be a consistent heuristic used by the algorithms. Then, $A$ will always expand all nodes surely expanded by $A^*$.
 \end{theorem}
 \begin{proof}
@@ -772,15 +769,89 @@ which violates the heuristic's consistency in $G$, since $\Delta > 0$.
 Since $A$ is not more informed than $A^*$, it will behave the same way in $G'$ as it did in $G$, therefore not expanding $u$ and failing to find the path to $t$ with cost lower than $f^*$, which contradicts the fact that $A$ is admissible.
 \end{proof}
 
+\begin{definition}
+A \textbf{tie-breaking} rule is the rule that $A^*$ uses to choose the next node to expand when there is more than one node with the same score.
+\end{definition}
+
+We observe that in cases in which there are no non-goal nodes with score $f^*$, the set of nodes surely expanded by $A^*$ is actually the entire set of nodes expanded by $A^*$. This happens when $h(u) < \hat{h}(u)$ for every node $u$ in the graph, and in this case we say that the algorithm is not fully informed. If there are nodes with score equal to $f^*$ other than the preferred goal node, the algorithm may potentially have to expand all the nodes with such score until it finds the preferred goal node. Then, the optimality of the algorithm depends on the tie-breaking rule used.
+
+The following result is useful when we can't find consistent heuristics for some specific problems. It tells us that by finding higher bounds of an admissible heuristic, we generally can improve efficiency when there is a single goal node. This efficiency is, of course, bounded by that of a consistent heuristic, as we proved in Theorem \ref{thm:astar-optimality}.
+
+\begin{theorem}
+\label{thm:dominating-heuristic}
+Let $G = (V, E)$ be a graph, let $h, h'$ be two admissible heuristics, and let $A^*_h, A^*_{h'} \in \mathcal{A^*}$ be the $A^*$ algorithms using these heuristics. Suppose we only have a single goal node $t$. Then,
+\[ h'(u) \geq h(u) \  \forall u \in V \Rightarrow A^*_{h'} \text{ dominates } A^*_h \]
+\end{theorem}
+\begin{proof}
+Suppose $A^*_h$ does not expand a node $u \in V$. Then, it suffices to show that $A^*_{h'}$ does not expand $u$ either.
+
+If $u$ is not expanded by $A^*_h$, then either $f(u) > f(t)$ or $f(u) = f(t)$ and the tie-breaking rule selected $t$ before $u$. Let's call $f'$ the score used by $A^*_{h'}$.
+
+Since $h'(u) \geq h(u)$, $f'(u) = g(u) + h'(u) \geq g(u) + h(u) = f(u)$. Then, if $f(u) > f(t)$, we have $f'(u) > f'(t)$ and $u$ will not be expanded. If $f(u) = f(t)$ and $h(u) = h'(u)$, then $f'(u) = f'(t)$, and the same tie-breaking rule will still select $t$ before $u$, therefore not expanding $u$.
+\end{proof}
+
+Suppose there was more than one goal node in the premises of Theorem \ref{thm:dominating-heuristic}. Let $t$ be the preferred goal node found by $A^*_h$, and $t'$ the one found by $A^*_{h'}$. Since both heuristics are admissible, and both $t$ and $t'$ are preferred goal nodes, $f(t) = \hat{g}(t) = \hat{g}(t') = f'(t')$. In the case where $f(u) = f(t)$ and $h(u) = h'(u)$, we would have $f'(u) = f'(t')$, but the tie-breaking rule could expand $u$ before $t'$, so the result would not hold in this case.
+
+Note that, in general, it is very difficult to find an heuristic such that $h(u) = \hat{h}(u) \  \forall u \in V$, so we usually have to settle for some good lower bound by approximating this value.
+
+\section{Heuristics on grid maps}
+Our simulator uses a grid map, so it is convenient to talk about some of the different heuristics we could use in this type of problem. In a grid graph, we have nodes uniquely identified by their coordinates, $(x, y)$, where $x,y \in \mathbb{Z}$.
+
+\begin{definition}
+The \textbf{Manhattan distance} between two nodes with coordinates $(x_0, y_0)$ and $(x_1, y_1)$ is defined as
+\begin{equation}
+|x_1 - x_0| + |y_1 - y_0|
+\end{equation}
+\end{definition}
+
+If the grid only allows horizontal and vertical movement, then it's easy to see that the Manhattan distance between any two nodes $u, v$ is actually $\delta(u, v)$. Therefore, a good heuristic in this case is to use the Manhattan distance from any node $u$ to the goal node, since in this case $h(u) = \hat{h}(u)$.
+
+\begin{definition}
+The \textbf{Chebyshev distance} between two nodes with coordinates $(x_0, y_0)$ and $(x_1, y_1)$ is defined as
+\begin{equation}
+\max \{ |x_1 - x_0|, |y_1 - y_0| \}\label{eq:chebyshev}
+\end{equation}
+\end{definition}
+
+If the grid allows diagonal movement, and moving diagonally has the same base cost as moving horizontally or vertically, then the Chebyshev distance between any two nodes $u, v$ is $\delta(u, v)$, and we can use it as the heuristic to get optimal efficiency.
+
+Remember that, as we saw in figure \ref{fig:counterexample:admissible}, the heuristic that uses the Manhattan distance is not admissible in a grid that allows diagonal movement, and as a result the algorithm will not be admissible.
+
+\begin{definition}
+The \textbf{octile distance} between two nodes with coordinates $(x_0, y_0)$ and $(x_1, y_1)$ is defined as
+\begin{equation}
+\max \{ |x_1 - x_0|, |y_1 - y_0| \} + \sqrt{2} \min \{ |x_1 - x_0|, |y_1 - y_0| \}\label{eq:octile}
+\end{equation}
+\end{definition}
+
+This distance is useful as an heuristic when the base cost of moving diagonally is $\sqrt{2}$, using the Pythagorean theorem on the base costs of moving horizontally and vertically which are $1$.
+
+The Chebyshev and octile distances are actually special cases of a more general distance called the diagonal distance.
+
+\begin{definition}
+The \textbf{diagonal distance} between two nodes with coordinates $(x_0, y_0)$ and $(x_1, y_1)$ is defined as
+\begin{equation}
+D \max \{ |x_1 - x_0|, |y_1 - y_0| \} + (D' - D) \min \{ |x_1 - x_0|, |y_1 - y_0| \}\label{eq:diagonal-distance}
+\end{equation}
+where $D$ is the cost of moving horizontally and vertically, and $D'$ is the cost of moving diagonally.
+\end{definition}
+
+Observe that equation \ref{eq:chebyshev} is obtained by setting $D = D' = 1$ in equation \ref{eq:diagonal-distance}, and equation \ref{eq:octile} is obtained by setting $D = 1$ and $D' = \sqrt{2}$.
+
+In all these cases, we could use the Euclidean distance between the points as heuristics, which is admissible, but the alternatives presented always dominate over it by Theorem \ref{thm:dominating-heuristic}.
+
 
 \chapter{$A^*$ variants}
+
+In the last chapters we have mainly focused on the $A^*$ algorithm. But the addition rule used by the score, $f = g + h$, is not the only way to use the heuristic information we have, and we could also tweak the way nodes are expanded, giving rise to new algorithms, fundamentally different from $A^*$, but still close enough to be considered part of the same family. In this chapter we will present some variants of the $A^*$ algorithm, explaining how they fundamentally change from the $A^*$ we have seen, and the benefits that using them may give us.
+
 
 \section{$IDA^*$}
 Iterative Deepening $A^*$, or $\bm{IDA^*}$, is a variant of $A^*$ based on iterative deepening search, which is a modification of Depth-First Search that finds the best depth limit. %TODO talk about DFS in the annex
 
 
 %TODO make chapter on tie-breaking rules
-
+%TODO make chapter on applications: 8-puzzle? route finding, AI, etc...
 
 \begin{appendices}
 
