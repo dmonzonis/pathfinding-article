@@ -880,6 +880,36 @@ Using this simple format means that we can also generate maps from another progr
 \end{figure}
 
 
+% Benchmark chapter
+\chapter{Comparison of the algorithms}
+The goal of this chapter is to perform an experiment to compare the memory and time efficiency of the algorithms presented in this work in some particular problems. We will use two different datasets, each of which represents a different types of problem. The first will be using a randomly generated grid graph, with the same properties we have seen thorough this work. The second is a graph of the roads in the city of New York, where each node is represented by a geolocation given in latitude and longitude, and each edge has a weight representing the distance of the road.
+
+\section{Grid benchmark}
+For the benchmark using a grid graph, we have generated a 1000x1000 grid in which the weight of each tile is randomly set on creation from a value in the set $\{ 1, 3, 5, 7, 9, \infty \}$. Remember that a weight of $\infty$ represents a wall, or equivalently, a disconnected node, in a grid graph. The grid graph used does not allow diagonal movement.
+
+We then select a random pair of source and goal tiles, making sure none of them is a wall tile. Then, we execute each of the algorithms evaluated with the given source and goal tiles, and measure the number of nodes they expand and their total execution time, as well as the distances of the paths they find by the time they are finished. If there does not exist a path from the source to the goal nodes that were selected, the result is discarded, a new set of source and goal nodes are generated and the whole process is repeated.
+
+This process is done for 1000 times, and this way we have ensured that all those times there existed a path from source to goal, since in the case a path did not exist, all algorithms would expand all the nodes connected to the source and them terminate unsuccessfully, which does not bring any useful information to the efficiency comparison that we are trying to achieve.
+
+We have evaluated four algorithms:
+\begin{itemize}
+\item \textit{Dij}: Dijkstra's algorithm.
+\item $A^*_M$: $A^*$ using the Manhattan distance as heuristic.
+\item $A^*_E$: $A^*$ using the Euclidean distance as heuristic.
+\item $G_M$: Greedy Best-First search using the Manhattan distance as heuristic.
+\end{itemize}
+
+The results of the benchmark are shown in table %TODO
+
+\begin{center}
+	\begin{tabular}{|l|l|l|l|}
+	\hline
+	\textit{Dij} & $A^*_M$ & $A^*_E$ & $G_M$ \\ \hline
+	\end{tabular}
+\end{center}
+
+
+
 \chapter{$A^*$ variants}
 
 In the last chapters we have mainly focused on the $A^*$ algorithm. But the addition rule used by the score, $f = g + h$, is not the only way to use the heuristic information we have, and we could also tweak the way nodes are expanded, giving rise to new algorithms, fundamentally different from $A^*$, but still close enough to be considered part of the same family. In this chapter we will present some variants of the $A^*$ algorithm, explaining how they fundamentally change from the $A^*$ we have seen, and the benefits that using them may give us.
