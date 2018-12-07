@@ -53,9 +53,9 @@ Abstract goes here.
 \tableofcontents
 
 \chapter{Introduction}
-Many problems in the fields of science, mathematics and engineering can be generalised to the problem of finding a path in a graph. Examples of such problems include routing of telephone or Internet traffic, layout of printed circuit boards, automated theorem proving, GPS routing, decision making in artificial intelligence and robotics. In this article, we will provide a mathematical and applied approach to this problem.
+Many problems in the fields of science, mathematics and engineering can be generalised to the problem of finding a path in a graph. Examples of such problems include routing of telephone or Internet traffic, layout of printed circuit boards, automated theorem proving, GPS routing, decision making in artificial intelligence and robotics. In this work, we will provide a mathematical and applied approach to this problem.
 
-For most of the examples in the article we will be using a grid graph, represented by a tiled 2D map, in which each tile (or node) is connected to its adjacent tiles. In the map, each tile can have a different weight, or be a wall, which is impassable. This notion of weighted nodes and walls can be translated to the structure of a weighted directed graph by thinking of the weights of the tiles as the weights of the edges that connect adjacent tiles to it. Walls can be thought of as nodes that are not connected (or just non-existent) to any other node, and therefore not reachable from other nodes. A pathfinding simulator was built for this article to help illustrate these examples.
+For most of the examples we will be using a grid graph, represented by a tiled 2D map, in which each tile (or node) is connected to its adjacent tiles. In the map, each tile can have a different weight, or be a wall, which is impassable. This notion of weighted nodes and walls can be translated to the structure of a weighted directed graph by thinking of the weights of the tiles as the weights of the edges that connect adjacent tiles to it. Walls can be thought of as nodes that are not connected (or just non-existent) to any other node, and therefore not reachable from other nodes. A pathfinding simulator was built for this work to help illustrate these examples.
 
 \chapter{The $A^*$ algorithm}
 \label{chapter:algorithms}
@@ -71,7 +71,7 @@ A \textbf{weighted directed graph} is a graph in which $\forall e \in E \ \exist
 If $e = (u, v)$ for some $u, v \in V$, then we equivalently call $d(u, v) = w(e)$ the \textbf{distance} from $u$ to $v$.
 \end{definition}
 
-From now on, when we talk about a graph, we will implicitly refer to a finite weighted directed graph, since it's the most general type of graph we will work with. An unweighted graph can be thought of as a weighted graph where all weights are equal to one, and an undirected graph as a directed graph where $\forall (u, v) \in E,\  \exists (v, u) \in E$. Also, the graphs we will work with are finite, meaning that $|V| < \infty$ and $|E| < \infty$.
+From now on, when we talk about a graph, we will implicitly refer to a finite weighted directed graph, since it is the most general type of graph we will work with. An unweighted graph can be thought of as a weighted graph where all weights are equal to one, and an undirected graph as a directed graph where $\forall (u, v) \in E,\  \exists (v, u) \in E$. Also, the graphs we will work with are finite, meaning that $|V| < \infty$ and $|E| < \infty$.
 
 \begin{definition}[Path]
 Given a graph $G$, and $u, v \in V$, a \textbf{path} $P$ between $u$ and $v$ is an ordered list of a certain amount of edges, $N$, in the form
@@ -175,7 +175,7 @@ The pseudocode for the algorithm is presented in algorithm \ref{alg:bfs}. The al
 \end{algorithmic}
 \end{algorithm}
 
-In the rest of this article, we will consider a set of goal nodes instead of a single goal node, since this makes the algorithms, and therefore the results shown, more general. We will call this set of goal nodes $T$. This way, having a single goal node is only a special case of the more general condition when $|T| = 1$.
+In the rest of this work, we will consider a set of goal nodes instead of a single goal node, since this makes the algorithms, and therefore the results shown, more general. We will call this set of goal nodes $T$. This way, having a single goal node is only a special case of the more general condition when $|T| = 1$.
 
 We see that with this version of BFS, all nodes in the connected component of the starting node are explored. We can improve the performance if we halt the execution once we reach a goal node, which is a fair condition since all we're looking for is a path between the source and a goal node, and once we find it we don't need to keep searching. This new version of the algorithm with the early exit is shown in algorithm \ref{alg:bfs_early_exit}.
 
@@ -222,7 +222,7 @@ Note that, even though BFS will always find a path between two nodes if they are
 \label{fig:bfs-fail}
 \end{figure}
 
-Also, the algorithm doesn't seem very efficient, since we can potentially explore lots of nodes on a very dense graph.
+Also, the algorithm does not seem very efficient, since we can potentially explore lots of nodes on a very dense graph.
 
 We will first address the optimality problem in the next section, and then we will focus on efficiency.
 
@@ -316,7 +316,7 @@ We know that, at the end of Dijkstra's algorithm, we'll have explored all the no
 Given a source node and a single goal node, Dijkstra's algorithm always finds an optimal path between the two nodes if it exists.
 \end{corollary}
 \begin{proof}
-Let $G = (V, E)$, and let $\alpha, \beta \in V$ be the source and goal nodes, respectively. If $\beta \not \in C_\alpha$, there doesn't exist an optimal path. Suppose $\beta \in C_\alpha$. By Theorem \ref{thm:dijkstra}, after running Dijkstra, $d_D(\alpha, \beta) = \delta(\alpha, \beta)$, so an optimal path has been found.
+Let $G = (V, E)$, and let $\alpha, \beta \in V$ be the source and goal nodes, respectively. If $\beta \not \in C_\alpha$, an optimal path does not exist. Suppose $\beta \in C_\alpha$. By Theorem \ref{thm:dijkstra}, after running Dijkstra, $d_D(\alpha, \beta) = \delta(\alpha, \beta)$, so an optimal path has been found.
 \end{proof}
 
 Like with BFS, we can modify the algorithm to use early exit to improve performance.
@@ -338,7 +338,7 @@ As we have seen in the last section, we now have an algorithm that can find the 
 Given any node $u \in V$, $t \in T$ is a \textbf{preferred goal node} of $u$ if the distance of an optimal path from $u$ to $t$ does not exceed the distance of any other path from $u$ to a node in $T$.
 \end{definition}
 
-Let's forget about optimality for a moment, and modify our pathfinding algorithm to use only an heuristic. An heuristic is a function
+Let's forget about optimality for a moment, and modify our pathfinding algorithm to use only a heuristic. A heuristic is a function
 \begin{align*}
 	h \colon V &\to \mathbb{R}\\
 	u &\mapsto h(u)
@@ -417,7 +417,7 @@ where $g(u)$ is an estimate of the optimal distance from the source to the node 
 
 In $A^*$, a good choice for the g-score is using, for each node $u$, the cost of the path from the source to $u$ found so far by the algorithm, which is equivalent to the distance we kept updating in Dijkstra's algorithm. Note that this implies $g(u) \geq \hat{g}(u) \ \forall u \in V$. For the h-score, we use some heuristic, which will depend on the problem.
 
-When a node is explored, its g-score, and thus its score will be updated. The pseudocode for the algorithm is shown in algorithm \ref{alg:astar}. As we can see, it's very similar to Dijkstra's, except that we now use the score for the priority queue ordering, instead of just the distance to that node.
+When a node is explored, its g-score, and thus its score will be updated. The pseudocode for the algorithm is shown in algorithm \ref{alg:astar}. As we can see, it is very similar to Dijkstra's, except that we now use the score for the priority queue ordering, instead of just the distance to that node.
 
 \begin{algorithm}
 \caption{$A^*$ algorithm}
@@ -480,7 +480,7 @@ Now suppose $\alpha \in S$. Let
 \[ \Delta = \{ n \in S \  | \  n \text{ is part of } P,\  g(n) = \hat{g}(n) \} \]
 $\Delta$ is clearly not empty since $\alpha \in \Delta$.
 
-Let $n^* \in \Delta$ be the node that satisfies $d_P(\alpha, n^*) \leq d_P(\alpha, n) \  \forall n \in \Delta$. Since $w(e) > 0\  \forall e \in E$, $n^*$ is unique. Also, $n^* \neq u$ since $u \not \in S$. Let $v$ be the successor of $n^*$ in $P$. Note that it's possible that $v = u$.
+Let $n^* \in \Delta$ be the node that satisfies $d_P(\alpha, n^*) \leq d_P(\alpha, n) \  \forall n \in \Delta$. Since $w(e) > 0\  \forall e \in E$, $n^*$ is unique. Also, $n^* \neq u$ since $u \not \in S$. Let $v$ be the successor of $n^*$ in $P$. Note that it is possible that $v = u$.
 
 Now, $g(v) \leq g(n^*) + w((n^*, v))$ by the definition of $g$, and since $n^* \in \Delta$, $g(n^*) = \hat{g}(n^*)$. Also, $\hat{g}(v) = \hat{g}(n^*) + w((n^*, v))$, because $P$ is an optimal path. Therefore, $g(v) \leq \hat{g}(v)$. But it is always true that $g(v) \geq \hat{g}(v)$. Therefore, $g(v) = \hat{g}(v)$, and by the definition of $\Delta$, $v \not \in \Delta$ implies $v \in O$.
 \end{proof}
@@ -512,7 +512,7 @@ where the last inequality comes from our definition of the g-score.
 
 By Lemma \ref{lemma:astar2}, we see that there will always be a node $v \in O$ on an optimal path from the source to one of its preferred goal nodes such that $f(v) \leq f^* < f(u)$, so the algorithm will always pick it first, and therefore no nodes further than $M$ steps from $\alpha$ are ever explored.
 
-Then, the only reason why the algorithm never terminates is because it's trapped in a loop where it repeatedly explores nodes that are less than $M$ steps away from $\alpha$. Let $V_M$ be the set of nodes accessible within $M$ or less steps from $\alpha$. Consider any node $u \in V_M$. There are only a finite number of paths from $\alpha$ to $u$ that only pass through nodes in $V_M$, and therefore $u$ can only be explored a finite number of times. We call this number $m_u$. Let
+Then, the only reason why the algorithm never terminates is because it is trapped in a loop where it repeatedly explores nodes that are less than $M$ steps away from $\alpha$. Let $V_M$ be the set of nodes accessible within $M$ or less steps from $\alpha$. Consider any node $u \in V_M$. There are only a finite number of paths from $\alpha$ to $u$ that only pass through nodes in $V_M$, and therefore $u$ can only be explored a finite number of times. We call this number $m_u$. Let
 \[ m = \max_{u \in V_M} m_u \]
 which is the maximum number of times any node can be explored. Then, after at most $|V_M| \cdot m$ expansions, all nodes in $V_M$ will be in the closed set. But we've seen that no nodes outside $V_M$ can be explored. Therefore, $A^*$ must terminate.
 \end{proof}
@@ -522,11 +522,11 @@ which is the maximum number of times any node can be explored. Then, after at mo
 If the heuristic is admissible, then $A^*$ is admissible.
 \end{theorem}
 \begin{proof}
-There are only three possible cases in which $A^*$ doesn't find an optimal path: the algorithm terminates at a node which is not a goal node, terminates at a goal node but the path found isn't optimal, or fails to terminate at all. We've already seen in Proposition \ref{prop:astar-termination} that $A^*$ always terminates, even if the heuristic is not admissible. Let's consider the other two cases separately.
+There are only three possible cases in which $A^*$ does not find an optimal path: the algorithm terminates at a node which is not a goal node, terminates at a goal node but the path found isn't optimal, or fails to terminate at all. We've already seen in Proposition \ref{prop:astar-termination} that $A^*$ always terminates, even if the heuristic is not admissible. Let's consider the other two cases separately.
 
 Consider the case where the algorithm terminates at a node which is not a goal node. Since we are using the early exit condition, which makes the algorithm terminate whenever it expands a goal node, the only possible way that the algorithm terminates without having found a goal node is if there wasn't any goal node in the open set to start with, or equivalently, no goal node is not connected to the start node, which contradicts our hypothesis.
 
-Consider the case where the algorithm terminates at a goal node, but doesn't find an optimal path. Let $\beta$ be the goal node at which the algorithm terminates. Note that since the heuristic is admissible
+Consider the case where the algorithm terminates at a goal node, but does not find an optimal path. Let $\beta$ be the goal node at which the algorithm terminates. Note that since the heuristic is admissible
 \[ 0 \leq h(\beta) \leq \hat{h}(\beta) = 0 \  \Rightarrow \  h(\beta) = 0 \]
 In this case, by the time the algorithm terminates, we have $f(\beta) = g(\beta) > f^*$ because the path found is not optimal. But by lemma \ref{lemma:astar2}, just before termination, there existed a node $u \in O$ on an optimal path with $f(u) \leq f^* < f(\beta)$, and since the algorithm uses a priority queue with the score, the node $u$ would have been selected for expansion instead of $\beta$, and the algorithm wouldn't have terminated.
 \end{proof}
@@ -606,7 +606,7 @@ For example the heuristic defined as $h(u) = 0 \  \forall u \in V$ is trivially 
 
 \begin{proposition}
 \label{prop:consistent}
-Given an heuristic $h$,
+Given a heuristic $h$,
 \[ h \text{ is consistent} \Rightarrow h \text{ is admissible} \]
 \end{proposition}
 \begin{proof}
@@ -655,7 +655,7 @@ With a consistent heuristic, any node $u$ closed by $A^*$ satisfies
 \begin{proof}
 Remember that our definition of the g-score implied $g(v) \geq \hat{g}(v) \ \forall v \in V$.
 
-Consider the state just before closing a node $u$, and suppose $g(u) > \hat{g}(u)$. Since $u$ is about to be closed, it means it's connected to the source node $\alpha$, and therefore an optimal path $P$ exists between $\alpha$ and $u$. Since $g(u) > \hat{g}(u)$, the algorithm hasn't found $P$ or any other optimal path. Since it did not find $P$, by Lemma \ref{lemma:astar1},
+Consider the state just before closing a node $u$, and suppose $g(u) > \hat{g}(u)$. Since $u$ is about to be closed, it means it is connected to the source node $\alpha$, and therefore an optimal path $P$ exists between $\alpha$ and $u$. Since $g(u) > \hat{g}(u)$, the algorithm hasn't found $P$ or any other optimal path. Since it did not find $P$, by Lemma \ref{lemma:astar1},
 \[ \exists v \in O \mid g(v) = \hat{g}(v) \]
 and such that $v$ is part of $P$.
 
@@ -713,7 +713,7 @@ Given two admissible algorithms $A$ and $B$, we say that $A$ \textbf{strictly do
 \end{definition}
 
 \begin{definition}
-Given an heuristic search algorithm $A$, we say that $A$ is \textbf{no more informed} than $A^*$ if $A$ has access to the same heuristic information as $A^*$, but placing no restriction in how it uses it, and doesn't have any extra information that $A^*$ does not have about unvisited nodes.
+Given a heuristic search algorithm $A$, we say that $A$ is \textbf{no more informed} than $A^*$ if $A$ has access to the same heuristic information as $A^*$, but placing no restriction in how it uses it, and does not have any extra information that $A^*$ does not have about unvisited nodes.
 \end{definition}
 
 We can then treat the heuristic as a parameter of the graph, where each node $u$ has an assigned value $h(u)$, and all heuristic search algorithms no more informed than $A^*$ have access to this information.
@@ -790,7 +790,7 @@ Since $h'(u) \geq h(u)$, $f'(u) = g(u) + h'(u) \geq g(u) + h(u) = f(u)$. Then, i
 
 Suppose there was more than one goal node in the premises of Theorem \ref{thm:dominating-heuristic}. Let $t$ be the preferred goal node found by $A^*_h$, and $t'$ the one found by $A^*_{h'}$. Since both heuristics are admissible, and both $t$ and $t'$ are preferred goal nodes, $f(t) = \hat{g}(t) = \hat{g}(t') = f'(t')$. In the case where $f(u) = f(t)$ and $h(u) = h'(u)$, we would have $f'(u) = f'(t')$, but the tie-breaking rule could expand $u$ before $t'$, so the result would not hold in this case.
 
-Note that, in general, it is very difficult to find an heuristic such that $h(u) = \hat{h}(u) \  \forall u \in V$, so we usually have to settle for some good lower bound by approximating this value.
+Note that, in general, it is very difficult to find a heuristic such that $h(u) = \hat{h}(u) \  \forall u \in V$, so we usually have to settle for some good lower bound by approximating this value.
 
 \begin{theorem}
 \label{thm:exact-heuristics-consistency}
@@ -813,7 +813,7 @@ The \textbf{Manhattan distance} between two nodes with coordinates $(x_0, y_0)$ 
 \end{equation}
 \end{definition}
 
-If the grid only allows horizontal and vertical movement, then it's easy to see that the Manhattan distance between any two nodes $u, v$ is actually $\delta(u, v)$. Therefore, a good heuristic in this case is to use the Manhattan distance from any node $u$ to the goal node, since in this case $h(u) = \hat{h}(u)$. By Theorem \ref{thm:exact-heuristics-consistency}, this heuristic will also be consistent.
+If the grid only allows horizontal and vertical movement, then it is easy to see that the Manhattan distance between any two nodes $u, v$ is actually $\delta(u, v)$. Therefore, a good heuristic in this case is to use the Manhattan distance from any node $u$ to the goal node, since in this case $h(u) = \hat{h}(u)$. By Theorem \ref{thm:exact-heuristics-consistency}, this heuristic will also be consistent.
 
 \begin{definition}
 The \textbf{Chebyshev distance} between two nodes with coordinates $(x_0, y_0)$ and $(x_1, y_1)$ is defined as
@@ -833,7 +833,7 @@ The \textbf{octile distance} between two nodes with coordinates $(x_0, y_0)$ and
 \end{equation}
 \end{definition}
 
-This distance is useful as an heuristic when the base cost of moving diagonally is $\sqrt{2}$, using the Pythagorean theorem on the base costs of moving horizontally and vertically which are $1$.
+This distance is useful as a heuristic when the base cost of moving diagonally is $\sqrt{2}$, using the Pythagorean theorem on the base costs of moving horizontally and vertically which are $1$.
 
 The Chebyshev and octile distances are actually special cases of a more general distance called the diagonal distance.
 
@@ -852,7 +852,7 @@ In all these cases, we could use the Euclidean distance between the points as he
 
 \chapter{Pathfinding simulator}
 
-In this brief chapter we will discuss the simulator built for this article, its options and implementation. As we already know, our simulator uses a grid graph. For the graphical interface, we have used the Qt library. The interface has a central widget where the grid graph is represented, and below it are some options to select the algorithm being used and its behaviour. There is also a menu bar from where we can do other things like save or load maps to a file.
+In this brief chapter we will discuss the simulator built for this work, its options and implementation. As we already know, our simulator uses a grid graph. For the graphical interface, we have used the Qt library. The interface has a central widget where the grid graph is represented, and below it are some options to select the algorithm being used and its behaviour. There is also a menu bar from where we can do other things like save or load maps to a file.
 
 In the grid, nodes are usually referred to as tiles. By left-clicking on a tile, we paint it with the currently selected weight or tile type. We have pre-defined some tile types (wall, floor, forest and water), and an option to create a custom tile type with a weight set by the user. The weight of the selected tile type is shown next to the tile type selection combo box. The weight of wall tiles is $\infty$, so painting a node with a tile type of wall is equivalent to 'removing' or disconnecting the node from the grid. We can think of painting a tile with some weight as setting the weights of the edges that go from adjacent tiles (neighbours) to that tile.
 
@@ -860,11 +860,11 @@ The algorithms implemented are the ones we have presented in chapter \ref{chapte
 
 The selected algorithm will execute itself interactively each time the grid changes, showing with a yellow path the path found by the algorithm from the source to the goal node, if it exists. This path will be an optimal path if and only if the algorithm used is admissible.
 
-There's an option to show the cost to each of the nodes that the algorithm examined that the algorithm had computed by the time it terminated. This can be especially useful to get an idea of number and the position of the nodes that have been expanded in its execution, and the number in the goal tile will be the optimal distance from the source, as long as the algorithm is admissible.
+There is an option to show the cost to each of the nodes which the algorithm had examined by the time it terminated. This can be especially useful to get an idea of number and the position of the nodes that have been expanded in its execution, and the number in the goal tile will be the optimal distance from the source, as long as the algorithm is admissible.
 
 We can drag and drop the source and goal tiles (represented with a red square and a red cross respectively) into any other tile with the right mouse button. Using the mouse wheel, we can zoom in and out on the map, and by dragging with the middle mouse button, we can pan the view.
 
-There are also different tools or modes for painting tiles, introduced only for the sake of simplicity. With the pencil tool, we paint the tiles that are under the cursor. The bucket tool paints all tiles in an enclosed region where the weights are the same as the one where we click initially. The line tool allows to create approximations of lines by dragging with the left mouse button from an initial point to an end point, using Bresenhaum's algorithm\footnote{\DEBUGComment{Add cite to reference, or talk about it in the appendix?}}. Finally, the rectangle tool allows us to paint a filled rectangle by definind two opposing corners, using the left mouse button.
+There are also different tools or modes for painting tiles, introduced only for the sake of simplicity. With the pencil tool, we paint the tiles that are under the cursor. The bucket tool paints all tiles in an enclosed region where the weights are the same as the one where we click initially. The line tool allows to create approximations of lines by dragging with the left mouse button from an initial point to an end point, using Bresenham's algorithm\footnote{\DEBUGComment{Add cite to reference, or talk about it in the appendix?}}. Finally, the rectangle tool allows us to paint a filled rectangle by definind two opposing corners, using the left mouse button.
 
 We can enable or disable diagonal movement with the simple click of a checkbox. We can also enable or disable corner movement, which means moving diagonally between two tiles when there is a wall tile which is adjacent to both tiles.
 
@@ -912,7 +912,7 @@ The results of the benchmark are shown in table %TODO
 
 \chapter{$A^*$ variants}
 
-In the last chapters we have mainly focused on the $A^*$ algorithm. But the addition rule used by the score, $f = g + h$, is not the only way to use the heuristic information we have, and we could also tweak the way nodes are expanded, giving rise to new algorithms, fundamentally different from $A^*$, but still close enough to be considered part of the same family. In this chapter we will present some variants of the $A^*$ algorithm, explaining how they fundamentally change from the $A^*$ we have seen, and the benefits that using them may give us.
+In the last chapters we have mainly focused on the $A^*$ algorithm. But the addition rule used by the score, $f = g + h$, is not the only way to use the heuristic information we have, and we could also modify the way nodes are expanded, giving rise to new algorithms, fundamentally different from $A^*$, but still close enough to be considered part of the same family. In this chapter we will present some variants of the $A^*$ algorithm, explaining how they fundamentally change from the $A^*$ we have seen, and the benefits that using them may give us.
 
 
 \section{$IDA^*$}
@@ -924,11 +924,14 @@ Iterative Deepening $A^*$, or $\bm{IDA^*}$, is a variant of $A^*$ based on itera
 %TODO make chapter on tie-breaking rules
 %TODO make chapter on applications: 8-puzzle? route finding, AI, etc...
 
+\chapter{Benchmarks}
+%TODO benchmark A* against Dijkstra, using different heuristics. See how with complex, more precise heuristics, even if it expands less nodes, A* takes longer to execute, because computing the heuristic is actually more costly than expanding more nodes. Talk about the tradeoff between finding an optimal heuristic or a less-optimal but faster one.
+
 \begin{appendices}
 
 \chapter{Data structures}
 
-In this appendix we will briefly explain the data structures we used in our algorithms. We will only explain them on the interface level, and give the complexity of each of its operations. There are many different ways to implement these structures, but the details on the implementation and justification of the complexity are out of the scope of this article, but the information can be found in \emph{Introduction to Algorithms} by Thomas H. Cormen \textit{et al.}, or any other data structures or algorithmics book.
+In this appendix we will briefly explain the data structures we used in our algorithms. We will only explain them on the interface level, and give the complexity of each of its operations. There are many different ways to implement these structures, but the details on the implementation and justification of the complexity are out of the scope of this work, but the information can be found in \emph{Introduction to Algorithms} by Thomas H. Cormen \textit{et al.}, or any other data structures or algorithmics book.
 
 \section{Queue}
 \label{annex:queue}
@@ -940,7 +943,7 @@ In algorithms \ref{alg:bfs} and \ref{alg:bfs_early_exit} we use a queue. A queue
 \end{itemize}
 For this reason, we say that a queue is a FIFO (first in, first out) structure, meaning that we will remove items from the queue in the same order as we inserted them. We always insert items from the back, and remove them from the front.
 
-We also have a method, \emph{front}, which returns the item in the first position in the queue, but doesn't remove it.
+We also have a method, \emph{front}, which returns the item in the first position in the queue, but does not remove it.
 
 All these methods have a time complexity of $O(1)$.
 
@@ -951,16 +954,16 @@ In algorithms \ref{alg:dijkstra}, \ref{alg:greedy} and \ref{alg:astar} we use a 
 We use the following methods from the priority queue:
 \begin{itemize}
 \item \emph{insert}: Takes a pair of item and priority, and inserts the item into the right place in the priority queue. This method has a time complexity of $O(\log n)$ where $n$ is the number of elements in the priority queue.
-\item \emph{removeMin}: Returns the item in the front of the priority queue, that is, the item with the smallest priority value (since it's a minimum priority queue), and removes it from the priority queue. This method has a time complexity of $O(1)$.
+\item \emph{removeMin}: Returns the item in the front of the priority queue, that is, the item with the smallest priority value (since it is a minimum priority queue), and removes it from the priority queue. This method has a time complexity of $O(1)$.
 \item \emph{empty}: Tells us whether the queue is empty or not. Its complexity is $O(1)$.
 \end{itemize}
 
 We use the priority queue to get the node with minimum score (or distance in the case of Dijkstra, and h-score in the case of Greedy Best-First search) as the next node to be explored and closed. We also use this fact in many of the proofs.
 
-Note that there are other implementations of the priority queue in which insertion is $O(1)$ and removing the item with minimum value is $O(\log n)$, but in the end it doesn't matter which one we use.
+Note that there are other implementations of the priority queue in which insertion is $O(1)$ and removing the item with minimum value is $O(\log n)$, but in the end it does not matter which one we use.
 
 \section{Set}
-A set is an unordered list of unique items, but differs in implementation from a regular array, since it's usually implemented using a hash map, so lookup is much faster. We use mainly two operations on the set: the \emph{add} method, which inserts an item into the set, and the \emph{lookup} method (which we represented using mathematical notation in our conditions), which determines whether an item is part of the set or not. Both of these operations have a time complexity of $O(1)$.
+A set is an unordered list of unique items, but differs in implementation from a regular array, since it is usually implemented using a hash map, so lookup is much faster. We use mainly two operations on the set: the \emph{add} method, which inserts an item into the set, and the \emph{lookup} method (which we represented using mathematical notation in our conditions), which determines whether an item is part of the set or not. Both of these operations have a time complexity of $O(1)$.
 
 \section{Map}
 A map is a structure that stores data in pairs of key and value. Once we have some data in it, we look up using a key, which retrieves its corresponding value. In all of our algorithms, we used maps to store the node we came from for each visited node. In Dijkstra and $A^*$, we also used maps to store the current best distance from the source to each node, or equivalently the g-score. A map has two main methods: one to insert data and one to look up data. We have represented this using square bracket notation:
@@ -971,5 +974,8 @@ A map is a structure that stores data in pairs of key and value. Once we have so
 Inserting and looking up data in a map has a time complexity of $O(1)$.
 
 \end{appendices}
+
+\bibliography{pathfinding}
+\bibliographystyle{plain}
 
 \end{document}
