@@ -882,32 +882,62 @@ Using this simple format means that we can also generate maps from another progr
 
 % Benchmark chapter
 \chapter{Comparison of the algorithms}
-The goal of this chapter is to perform an experiment to compare the memory and time efficiency of the algorithms presented in this work in some particular problems. We will use two different datasets, each of which represents a different types of problem. The first will be using a randomly generated grid graph, with the same properties we have seen thorough this work. The second is a graph of the roads in the city of New York, where each node is represented by a geolocation given in latitude and longitude, and each edge has a weight representing the distance of the road.
+The goal of this chapter is to perform an experiment to compare the memory and time efficiency of the algorithms presented in this work in a particular set of problems. To achieve this, two benchmarks were run, each using a different dataset with a particular type of graph. In the first benchmark, we used a grid graph, like the ones the simulator uses, but with randomized weights. In the second benchmark, we used a graph generated from the roads of Florida, where each node is an intersection and each edge is a road. In the next sections, we will describe in detail how each benchmark was prepared and its results.
 
-\section{Grid benchmark}
-For the benchmark using a grid graph, we have generated a 1000x1000 grid in which the weight of each tile is randomly set on creation from a value in the set $\{ 1, 3, 5, 7, 9, \infty \}$. Remember that a weight of $\infty$ represents a wall, or equivalently, a disconnected node, in a grid graph. The grid graph used does not allow diagonal movement.
+\section{Grid graph benchmark}
+For this benchmark, we generated a 1000x1000 grid graph in which the weight of each tile is picked randomly from a value in the set $\{ 1, 3, 5, 7, 9, \infty \}$ on creation, with equal probability. Remember that a weight of $\infty$ represents a wall, or equivalently, a disconnected node, in a grid graph. The grid graph used does not allow diagonal movement.
 
-We then select a random pair of source and goal tiles, making sure none of them is a wall tile. Then, we execute each of the algorithms evaluated with the given source and goal tiles, and measure the number of nodes they expand and their total execution time, as well as the distances of the paths they find by the time they are finished. If there does not exist a path from the source to the goal nodes that were selected, the result is discarded, a new set of source and goal nodes are generated and the whole process is repeated.
+We then select a random pair of source and goal tiles, making sure none of them is a wall tile. Then, we execute each of the algorithms evaluated with the given source and goal tiles, and measure the number of nodes they expand and their total execution time, as well as the distances of the paths they find by the time they are finished. We count a node expansion whenever a node is closed, that is, taken out from the priority queue for further examination. If there does not exist a path from the source to the goal nodes that were selected, the result is discarded, a new set of source and goal nodes are generated and the algorithms are evaluated again. We ensured to only evaluate the algorithms when a path exists since in the case a path did not exist, all algorithms would expand all the nodes connected to the source and then terminate unsuccessfully, which does not bring any useful information to the efficiency comparison that we are trying to achieve. This whole process is repeated 1000 times.
 
-This process is done for 1000 times, and this way we have ensured that all those times there existed a path from source to goal, since in the case a path did not exist, all algorithms would expand all the nodes connected to the source and them terminate unsuccessfully, which does not bring any useful information to the efficiency comparison that we are trying to achieve.
+We have evaluated four algorithms on this benchmark: Dijkstra's algorithm, $A^*$ using the Manhattan distance as heuristic, $A^*$ using the Euclidean distance as heuristic, and Greedy Best-First Search using the Manhattan distance as heuristic. Note that, as we saw in section \ref{section:heuristics-grid}, the Manhattan distance is a consistent heuristic in our problem. With Proposition \ref{prop:closed-optimal} it was seen that a simpler implementation was possible where no closed nodes would never be re-opened, as long as the heuristic is consistent. However, we still used the same implementation as described in \ref{alg:astar}. Since we did not use the simpler implementation, the algorithm in this case may have expanded more nodes in some of the test cases than it would have if we had used it, but to keep it more general and fair, it was decided to use the same algorithm that was presented earlier.
 
-We have evaluated four algorithms:
-\begin{itemize}
-\item \textit{Dij}: Dijkstra's algorithm.
-\item $A^*_M$: $A^*$ using the Manhattan distance as heuristic.
-\item $A^*_E$: $A^*$ using the Euclidean distance as heuristic.
-\item $G_M$: Greedy Best-First search using the Manhattan distance as heuristic.
-\end{itemize}
+We have included Greedy Best-First search just for the sake of seeing how much faster it is than the other algorithms, but remember that it is not admissible. In the benchmark, Dijkstra's algorithm, as well as the two $A^*$ algorithms, always found the optimal distance between the source and goal nodes. This makes sense, since Dijkstra is always admissible, and in this problem both the Manhattan distance and the Euclidean distances are admissible. On the other hand, Greedy Best-First search never found an optimal path in all of the 1000 test cases that were executed for the benchmark.
 
-The results of the benchmark are shown in table %TODO
+The results of the benchmark are presented in Table \ref{table:grid-benchmark}. It is clear how the $A^*$ algorithms dominate over Dijkstra. Compared to Dijkstra, $A^*$ using the Manhattan distance evaluated $25.16\%$ less nodes, and was $31.4\%$ faster, showing a clear advantage in memory and speed. On the other hand, $A^*$ using the Euclidean distance also did very good memory-wise, expanding $21.8\%$ less nodes than Dijkstra, but time-wise the gain was not that substantial, being only $5.3\%$ faster, probably due to a badly implemented heuristic function which made it took longer than expected to compute.
 
 \begin{center}
-	\begin{tabular}{|l|l|l|l|}
+	\begin{tabular}{lcc}
+	\label{table:grid-benchmark}
+	Algorithm & Expanded nodes (total) & Time ($s$)  \\
 	\hline
-	\textit{Dij} & $A^*_M$ & $A^*_E$ & $G_M$ \\ \hline
+	Dijkstra & 427985668 & 1407.05 \\
+	$A^*$ (Manhattan distance) & 320286310 & 964.59 \\
+	$A^*$ (Euclidean distance) & 334885701 & 1332.23 \\
+	Greedy Best-First Search & 804469 & 76.50 \\
 	\end{tabular}
+	\captionof{table}{Summary of the results from the grid graph benchmark.}
 \end{center}
 
+
+
+\section{Road graph benchmark}
+
+For the second benchmark, we used a dataset from the 9th DIMACS Challenge\cite{dimacs}, in particular, the graph that contains the roads of the state of Florida in the US. The graph contains 1070376 nodes, and 2712798 edges, where each node represents an intersection and each edge a road.
+
+Every node has a latitude and longitude associated given in microdegrees, which represent the geographical coordinates of the node. We use this information to build a weighted graph, giving each edge a weight equal to the great-circle distance %TODO Add cite
+computed using Haversine's formula %TODO Add cite
+. We will also use this information for the heuristics we will be using.
+
+Similar to the procedure of the first benchmark, we randomly select two nodes and execute each of the algorithms until it terminates, and we repeat this process for 1000 times. Like before, we evaluated 4 algorithms: Dijkstra's algorithm, $A^*$ with the Euclidean distance as heuristic, $A^*$ with the great-circle distance as heuristic, and Greedy Best-First Search with the Euclidean distance as heuristic. It is clear that both heuristics are admissible in this problem, but by Theorem \ref{thm:dominating-heuristic}, we expect the algorithm that uses the great-circle distance to dominate over the algorithm that uses the Euclidean distance.
+
+The results of the benchmark are presented in Table \ref{table:road-benchmark}. Again, both $A^*$ algorithms clearly dominate over Dijkstra, and this time the difference was even more noticeable, due to the nature of the graph used. $A^*$ with the Euclidean distance expanded $68.3\%$ less nodes than Dijkstra, and was $71.2\%$ faster, while still finding optimal paths on all 1000 of the test cases. On the other hand, $A^*$ with the great-circle distance dominates over the other $A^*$ algorithm like we expected, expanding $253664$ less nodes, but the execution time is actually higher, taking $17.19 s$ more in total. This is because, even though the heuristic is more precise, and dominates the other one, it's actually more costly to compute, since the Haversine formula involves trigonometric functions and their inverses, so the gain we get in memory, we lose in time efficiency. Still, the gain in memory is not that huge, because we are considering points which are relatively close to each other on the globe, where the Euclidean distance is a pretty good approximation of the great-circle distance. If we considered points further apart from each other, then there would probably be more noticeable differences, as the Euclidean distance would produce a poor estimate.
+%TODO Conclusions: balance memory efficiency and time efficiency
+
+\begin{center}
+	\begin{tabular}{lcc}
+	\label{table:road-benchmark}
+	Algorithm & Expanded nodes (total) & Time ($s$)  \\
+	\hline
+	Dijkstra & 580877763 & 1648.99 \\
+	$A^*$ (Euclidean distance) & 184378253 & 474.59 \\
+	$A^*$ (Great-circle distance) & 184124589 & 491.78 \\
+	Greedy Best-First Search & 15077804 & 25.50 \\
+	\end{tabular}
+	\captionof{table}{Summary of the results from the road graph benchmark.}
+\end{center}
+
+Again, we included the Greedy Best-First Search algorithm just to see how fast it can find paths, even though they may not be optimal. This algorithm only found an optimal path 95 out of the 1000 test cases that were executed.
+%TODO Conclusions: good to check if a path exists
 
 
 \chapter{$A^*$ variants}
@@ -924,8 +954,10 @@ Iterative Deepening $A^*$, or $\bm{IDA^*}$, is a variant of $A^*$ based on itera
 %TODO make chapter on tie-breaking rules
 %TODO make chapter on applications: 8-puzzle? route finding, AI, etc...
 
-\chapter{Benchmarks}
-%TODO benchmark A* against Dijkstra, using different heuristics. See how with complex, more precise heuristics, even if it expands less nodes, A* takes longer to execute, because computing the heuristic is actually more costly than expanding more nodes. Talk about the tradeoff between finding an optimal heuristic or a less-optimal but faster one.
+
+\chapter{Conclusions}
+
+
 
 \begin{appendices}
 
