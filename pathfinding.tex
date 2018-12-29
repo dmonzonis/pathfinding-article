@@ -1,8 +1,10 @@
-\documentclass[12pt]{report}
+\documentclass[a4paper,10pt]{report}
 \usepackage{amsthm}
 \usepackage{amssymb}
-\usepackage{amsmath}
+\usepackage[centertags]{amsmath}
+\edef\restoreparindent{\parindent=\the\parindent\relax}
 \usepackage[parfill]{parskip}  				% Newlines create actual paragraphs
+\restoreparindent
 \usepackage{algorithm} 						% For pseudocode
 \usepackage{algpseudocode}  					% For pseudocode
 \usepackage{hyperref}						% Adds hyperlinks
@@ -10,6 +12,14 @@
 \usepackage{tikz}							% Graph drawing
 \usepackage{subcaption}						% Subfigures
 \usepackage[toc]{appendix}					% Appendices
+\usepackage{multicol}
+\usepackage{color}
+
+\usepackage[T1]{fontenc}
+\usepackage[sc]{mathpazo}
+
+\usepackage[twoside,bindingoffset=1cm]{geometry}
+\usepackage{indentfirst}
 
 % Add spacing between theorems, which is zeroed by parskip
 \makeatletter
@@ -38,20 +48,68 @@
 \newcommand{\DEBUGComment}[1]{{\color{red}{#1}}}
 \newcommand{\DEBUGQuestion}[1]{{\color{blue}{#1}}}
 
-\title{
-{Pathfinding algorithms in graphs and applications}\\
-{\large Universitat de Barcelona}
-}
-\author{Daniel Monzonís Laparra}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\renewcommand{\chaptermark}[1]{\markboth{#1}{}}
+\renewcommand{\sectionmark}[1]{\markright{\thesection\ #1}}
+\fancyhf{} \fancyhead[LE,RO]{\bfseries\thepage}
+\fancyhead[LO]{\bfseries\rightmark} \fancyhead[RE]{\bfseries\leftmark}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{document}
-\maketitle
+
+\pagestyle{empty}
+
+%%% Title
+\begin{titlepage}
+\begin{center}
+\begin{figure}[htb]
+\begin{center}
+\includegraphics[width=6cm]{ub.png}
+\end{center}
+\end{figure}
+
+\textbf{\LARGE Treball final de grau} \\
+\vspace*{.5cm}
+\textbf{\LARGE GRAU DE MATEMÀTIQUES } \\
+\vspace*{.5cm}
+\textbf{\LARGE Facultat de Matemàtiques i Informàtica \\ Universitat de Barcelona} \\
+\vspace*{1.5cm}
+\rule{16cm}{0.1mm}\\
+\begin{Huge}
+\textbf{PATHFINDING ALGORITHMS IN GRAPHS AND APPLICATIONS} \\
+\end{Huge}
+\rule{16cm}{0.1mm}\\
+
+\vspace{1cm}
+
+\begin{flushright}
+\textbf{\LARGE Autor: Daniel Monzonís Laparra}
+
+\vspace*{2cm}
+
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{ll}
+\textbf{\Large Director:} & \textbf{\Large Dr. Antoni Benseny} \\
+\textbf{\Large Realitzat a:} & \textbf{\Large  Departament de Matemàtica Aplicada i Anàlisi} \\
+ & \textbf{\Large (nom del departament)} \\
+\\
+\textbf{\Large Barcelona,} & \textbf{\Large \today }
+\end{tabular}
+
+\end{flushright}
+\end{center}
+\end{titlepage}
+
 
 \chapter*{Abstract}
 Abstract goes here.
 
 \tableofcontents
 
+\pagestyle{fancy}
 \chapter{Introduction}
 Many problems in the fields of science, mathematics and engineering can be generalised to the problem of finding a path in a graph. Examples of such problems include routing of telephone or Internet traffic, layout of printed circuit boards, automated theorem proving, GPS routing, decision making in artificial intelligence and robotics. In this work, we will provide a mathematical and applied approach to this problem.
 
@@ -909,7 +967,6 @@ The results of the benchmark are presented in Table \ref{table:grid-benchmark}. 
 \end{center}
 
 
-
 \section{Road graph benchmark}
 
 For the second benchmark, we used a dataset from the 9th DIMACS Challenge\cite{dimacs}, in particular, the graph that contains the roads of the state of Florida in the US. The graph contains 1070376 nodes, and 2712798 edges, where each node represents an intersection and each edge a road.
@@ -1007,7 +1064,13 @@ Inserting and looking up data in a map has a time complexity of $O(1)$.
 
 \end{appendices}
 
-\bibliography{pathfinding}
-\bibliographystyle{plain}
+
+\begin{thebibliography}{99}
+
+\bibitem{hart} P. E. Hart, N. J. Nilsson, and B. Raphael, \textsl{A formal basis for the heuristic determination of minimum cost paths}, (1968), IEEE Transactions of Systems Science and Cybernetics, SSC-4, 2
+
+\bibitem{dimacs} 9th DIMACS Implementation Challenge, \url{http://www.dis.uniroma1.it/challenge9/}
+
+\end{thebibliography}
 
 \end{document}
