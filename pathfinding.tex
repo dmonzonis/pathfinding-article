@@ -104,7 +104,7 @@
 \end{titlepage}
 
 
-\chapter*{Abstract}
+\section*{Abstract}
 Abstract goes here.
 
 \tableofcontents
@@ -113,7 +113,12 @@ Abstract goes here.
 \chapter{Introduction}
 Many problems in the fields of science, mathematics and engineering can be generalised to the problem of finding a path in a graph. Examples of such problems include routing of telephone or Internet traffic, layout of printed circuit boards, automated theorem proving, GPS routing, decision making in artificial intelligence and robotics. In this work, we will provide a mathematical and applied approach to this problem.
 
-For most of the examples we will be using a grid graph, represented by a tiled 2D map, in which each tile (or node) is connected to its adjacent tiles. In the map, each tile can have a different weight, or be a wall, which is impassable. This notion of weighted nodes and walls can be translated to the structure of a weighted directed graph by thinking of the weights of the tiles as the weights of the edges that connect adjacent tiles to it. Walls can be thought of as nodes that are not connected (or just non-existent) to any other node, and therefore not reachable from other nodes. A pathfinding simulator was built for this work to help illustrate these examples.
+The aim of this work is to give a rigorous mathematical insight of the most popular pathfinding algorithms, focusing on $A^*$ and trying to understand how the heuristic it uses affects its correctness and performance. We complement this theoretical study of the algorithms with experimental results found by implementing and executing the algorithms in two different scenarios.
+
+For most of the examples we will be using a grid graph, represented by a tiled 2D map, in which each tile or node is connected to its adjacent tiles. In the map, each tile can have a different weight, or be a wall, which is impassable. This notion of weighted nodes and walls can be translated to the structure of a weighted directed graph by thinking of the weights of the tiles as the weights of the edges that connect adjacent tiles to it. Walls can be thought of as nodes that are not connected (or just non-existent) to any other node, and therefore not reachable from other nodes. A pathfinding simulator was built for this work to help illustrate these examples.
+
+More information about possible applications can be found in many resources, for exmaple, in \cite{ai}. %TODO add more
+
 
 \chapter{The $A^*$ algorithm}
 \label{chapter:algorithms}
@@ -272,7 +277,6 @@ We see that with this version of BFS, all nodes in the connected component of th
 
 Note that, even though BFS will always find a path between two nodes if they are connected, the path produced is not optimal when we consider weights. The path found will be the shortest in terms of the number of steps, but when taking into account the weights of the edges, this algorithm will not give us the shortest distance path, as we can see in figure \ref{fig:bfs-fail}.
 
-%TODO Put example images
 \begin{figure}
 \centering
 \includegraphics[width=1\linewidth]{bfs-fail}
@@ -286,7 +290,7 @@ We will first address the optimality problem in the next section, and then we wi
 
 
 \section{Dijkstra}
-Dijkstra's algorithm is also a well known graph theory algorithm, used to find optimal paths between nodes in a graph with positive weights. Now, instead of a simple queue, we use a priority queue\footnote{See \ref{annex:priorityqueue} for more information on priority queues.}. We keep exploring all unvisited neighbours of a node, but now we insert them in the priority queue using the distance of the edge, in a way that the node with the least distance from the source will be extracted first.
+Dijkstra's algorithm \cite{dijkstra} is also a well known graph theory algorithm, used to find optimal paths between nodes in a graph with positive weights. Now, instead of a simple queue, we use a priority queue\footnote{See \ref{annex:priorityqueue} for more information on priority queues.}. We keep exploring all unvisited neighbours of a node, but now we insert them in the priority queue using the distance of the edge, in a way that the node with the least distance from the source will be extracted first.
 
 Normally, the algorithm only gets a starting node, and computes the optimal paths to all reachable nodes from the origin, but since we're only concerned about finding the path to one of the goal nodes, we will use the early exit condition to end the execution as soon as we expand a goal node. Later, we will see that this still gives us the optimal path.
 
@@ -385,8 +389,7 @@ Using Dijkstra's algorithm with early exit with start node $\alpha$ and a single
 With early exit, when we explore the goal node $\beta$ we will end the execution of the algorithm. Using \ref{lemma:dijkstra}, we know that $d_D(u, \beta) = \delta(u, \beta)$, so we already have the optimal path between the two nodes.
 \end{proof}
 
-%TODO Talk about what happens when there are negative weights. Name Bellman-Ford algorithm.
-Note that Dijkstra's algorithm only works for graphs with positive weights. For graphs with negative weights, there are other less efficient algorithms which also find optimal paths, like the Bellman-Ford algorithm.
+Note that Dijkstra's algorithm only works for graphs with positive weights. In graphs with negative weights, it could possibly get stuck in an infinite loop of negative weight edges, since the total cost can become smaller indefinitely. For graphs with negative weights, there are other algorithms to find optimal paths, albeit significantly less efficient, like the Bellman-Ford algorithm \cite{bellman-ford}.
 
 \section{Greedy Best-First search}
 \label{section:greedy}
@@ -437,19 +440,13 @@ We will talk more about heuristics later, but for now, let's consider what happe
 \end{algorithmic}
 \end{algorithm}
 
-%TODO Define tilemap as 2d discrete map
-%TODO Define manhattan distance
-%\begin{definition}
-%The \textbf{Manhattan distance} between two points %TODO FINISH
-%\end{definition}
-
-%TODO Talk about the problems with the greedy search
+As we will see later in this work, this algorithm tends to finish much faster than Dijkstra. However, it does not produce optimal paths in general, since all it uses is the heuristic, so no information from the actual costs is used at all.
 
 \section{$A^*$}
 \label{section:astar}
 As we have seen, Dijkstra always gives us optimal paths, but it wastes a lot of time exploring a lot of nodes that are not in a promising direction. On the other hand, Greedy Best-First Search explores nodes in a promising direction, but does not produce optimal paths reliably.
 
-The $A^*$ algorithm is a combination of both algorithms. It takes into account both the actual distance from the source to a node, and the estimated distance from the node to the goal. Unlike Dijkstra's algorithm, which works for positive weights including zero, $A^*$ only works with strictly positive weights.
+The $A^*$ algorithm is a combination of both algorithms. It takes into account both the actual distance from the source to a node, and the estimated distance from the node to the goal. Unlike Dijkstra's algorithm, which works for positive weights including zero, $A^*$ only works with strictly positive weights. It was first described in 1968 by Peter Hart, Nils Nilsson and Bertram Raphael \cite{hart}.
 
 \begin{definition}
 If an algorithm $A$ always finds an optimal path between the source node and a preferred goal node, we say that $A$ is \textbf{admissible}.
@@ -514,7 +511,6 @@ When a node is explored, its g-score, and thus its score will be updated. The ps
 \end{algorithmic}
 \end{algorithm}
 
-%TODO is this paragraph necessary...?
 This new algorithm is faster than Dijkstra, but it only finds optimal reliably paths under a certain condition, which is what we will prove next.
 
 \begin{definition}
@@ -598,8 +594,7 @@ Dijkstra's algorithm is admissible.
 Dijkstra's algorithm is equivalent to $A^*$ with $h(u) = 0 \  \forall u \in V$. This heuristic is clearly admissible, so by Theorem \ref{thm:astar}, Dijkstra's algorithm is admissible.
 \end{proof}
 
-%TODO reference manhattan distance which will be defined in a future chapter
-In figure \ref{fig:counterexample:admissible} we see a counterexample which proves that the converse of the Theorem is not true in general. Here, we are using the Manhattan distance as heuristic, which is an inadmissible heuristic if diagonal movement is allowed, since it will overestimate the true optimal distance between nodes. We can see that $A^*$ finds a path with distance $23$, which is not optimal because, in the same circumstances, Dijkstra finds a path with distance $16$.
+In figure \ref{fig:counterexample:admissible} we see a counterexample which proves that the converse of the Theorem is not true in general. Here, we are using the Manhattan distance\footnote{The Manhattan distance is defined in \ref{def:manhattan}.} as heuristic, which is an inadmissible heuristic if diagonal movement is allowed, as it will overestimate the true optimal distance between nodes. We can see that $A^*$ finds a path with distance $23$, which is not optimal because, in the same circumstances, Dijkstra finds a path with distance $16$.
 
 \begin{figure}
 \centering
@@ -829,9 +824,10 @@ Since $A$ is not more informed than $A^*$, it will behave the same way in $G'$ a
 A \textbf{tie-breaking} rule is the rule that $A^*$ uses to choose the next node to expand when there is more than one node with the same score.
 \end{definition}
 
-We observe that in cases in which there are no non-goal nodes with score $f^*$, the set of nodes surely expanded by $A^*$ is actually the entire set of nodes expanded by $A^*$. This happens when $h(u) < \hat{h}(u)$ for every node $u$ in the graph, and in this case we say that the algorithm is not fully informed. If there are nodes with score equal to $f^*$ other than the preferred goal node, the algorithm may potentially have to expand all the nodes with such score until it finds the preferred goal node. Then, the optimality of the algorithm depends on the tie-breaking rule used.
+We observe that in cases in which there are no non-goal nodes with score $f^*$, the set of nodes surely expanded by $A^*$ is actually the entire set of nodes expanded by $A^*$. This happens when $h(u) < \hat{h}(u)$ for every node $u$ in the graph, and in this case we say that the algorithm is not fully informed \cite{optimality}. If there are nodes with score equal to $f^*$ other than the preferred goal node, the algorithm may potentially have to expand all the nodes with such score until it finds the preferred goal node. Then, the optimality of the algorithm depends on the tie-breaking rule used.
 
 The following result is useful when we can't find consistent heuristics for some specific problems. It tells us that by finding higher bounds of an admissible heuristic, we generally can improve efficiency when there is a single goal node. This efficiency is, of course, bounded by that of a consistent heuristic, as we proved in Theorem \ref{thm:astar-optimality}.
+
 
 \begin{theorem}
 \label{thm:dominating-heuristic}
@@ -860,11 +856,14 @@ If $h = \hat{h}$, then $\forall u, v \in V$, we have $h(u) = \delta(u, t)$ and $
 The consistency equation immediately follows, since $\delta(u, t) \leq \delta(u, v) + \delta(v, t)$, the case of equality being when $v$ is part of an optimal path between $u$ and $t$.
 \end{proof}
 
+With non-consistent heuristics, the worst case complexity of $A^*$ becomes exponential, as it may potentially need to re-open each node several times \cite{martelli}. However, it is worth noting that in some cases inconsistent heuristics can actually more efficient, as it has been found to happen for the $A^*$ variant $\text{IDA}^*$ with the BPMX enhancement \cite{inconsistent}.
+
 \section{Heuristics on grid graphs}
 \label{section:heuristics-grid}
 Our simulator uses a grid graph, so it is convenient to talk about some of the different heuristics we could use in this type of problem. In a grid graph, we have nodes uniquely identified by their coordinates, $(x, y)$, where $x,y \in \mathbb{Z}$.
 
 \begin{definition}
+\label{def:manhattan}
 The \textbf{Manhattan distance} between two nodes with coordinates $(x_0, y_0)$ and $(x_1, y_1)$ is defined as
 \begin{equation}
 |x_1 - x_0| + |y_1 - y_0|
@@ -891,7 +890,7 @@ The \textbf{octile distance} between two nodes with coordinates $(x_0, y_0)$ and
 \end{equation}
 \end{definition}
 
-This distance is useful as a heuristic when the base cost of moving diagonally is $\sqrt{2}$, using the Pythagorean theorem on the base costs of moving horizontally and vertically which are $1$.
+The octile distance is a good heuristic when the base cost of moving diagonally is $\sqrt{2}$, using the Pythagorean theorem on the base costs of moving horizontally and vertically which would be $1$.
 
 The Chebyshev and octile distances are actually special cases of a more general distance called the diagonal distance.
 
@@ -922,7 +921,7 @@ There is an option to show the cost to each of the nodes which the algorithm had
 
 We can drag and drop the source and goal tiles (represented with a red square and a red cross respectively) into any other tile with the right mouse button. Using the mouse wheel, we can zoom in and out on the map, and by dragging with the middle mouse button, we can pan the view.
 
-There are also different tools or modes for painting tiles, introduced only for the sake of simplicity. With the pencil tool, we paint the tiles that are under the cursor. The bucket tool paints all tiles in an enclosed region where the weights are the same as the one where we click initially. The line tool allows to create approximations of lines by dragging with the left mouse button from an initial point to an end point, using Bresenham's algorithm\footnote{\DEBUGComment{Add cite to reference, or talk about it in the appendix?}}. Finally, the rectangle tool allows us to paint a filled rectangle by definind two opposing corners, using the left mouse button.
+There are also different tools or modes for painting tiles, introduced only for the sake of simplicity. With the pencil tool, we paint the tiles that are under the cursor. The bucket tool paints all tiles in an enclosed region where the weights are the same as the one where we click initially. The line tool allows to create approximations of lines by dragging with the left mouse button from an initial point to an end point, using Bresenham's algorithm \cite{bresenham}. Finally, the rectangle tool allows us to paint a filled rectangle by definind two opposing corners, using the left mouse button.
 
 We can enable or disable diagonal movement with the simple click of a checkbox. We can also enable or disable corner movement, which means moving diagonally between two tiles when there is a wall tile which is adjacent to both tiles.
 
@@ -971,13 +970,11 @@ The results of the benchmark are presented in Table \ref{table:grid-benchmark}. 
 
 For the second benchmark, we used a dataset from the 9th DIMACS Challenge\cite{dimacs}, in particular, the graph that contains the roads of the state of Florida in the US. The graph contains 1070376 nodes, and 2712798 edges, where each node represents an intersection and each edge a road.
 
-Every node has a latitude and longitude associated given in microdegrees, which represent the geographical coordinates of the node. We use this information to build a weighted graph, giving each edge a weight equal to the great-circle distance %TODO Add cite
-computed using Haversine's formula %TODO Add cite
-. We will also use this information for the heuristics we will be using.
+Every node has a latitude and longitude associated given in microdegrees, which represent the geographical coordinates of the node. We use this information to build a weighted graph, giving each edge a weight equal to the great-circle distance computed using the haversine formula \cite{haversine}. We will also use this information for the heuristics we will be using.
 
 Similar to the procedure of the first benchmark, we randomly select two nodes and execute each of the algorithms until it terminates, and we repeat this process for 1000 times. Like before, we evaluated 4 algorithms: Dijkstra's algorithm, $A^*$ with the Euclidean distance as heuristic, $A^*$ with the great-circle distance as heuristic, and Greedy Best-First Search with the Euclidean distance as heuristic. It is clear that both heuristics are admissible in this problem, but by Theorem \ref{thm:dominating-heuristic}, we expect the algorithm that uses the great-circle distance to dominate over the algorithm that uses the Euclidean distance.
 
-The results of the benchmark are presented in Table \ref{table:road-benchmark}. Again, both $A^*$ algorithms clearly dominate over Dijkstra, and this time the difference was even more noticeable, due to the nature of the graph used. $A^*$ with the Euclidean distance expanded $68.3\%$ less nodes than Dijkstra, and was $71.2\%$ faster, while still finding optimal paths on all 1000 of the test cases. On the other hand, $A^*$ with the great-circle distance dominates over the other $A^*$ algorithm like we expected, expanding $253664$ less nodes, but the execution time is actually higher, taking $17.19 s$ more in total. This is because, even though the heuristic is more precise, and dominates the other one, it's actually more costly to compute, since the Haversine formula involves trigonometric functions and their inverses, so the gain we get in memory, we lose in time efficiency. Still, the gain in memory is not that huge, because we are considering points which are relatively close to each other on the globe, where the Euclidean distance is a pretty good approximation of the great-circle distance. If we considered points further apart from each other, then there would probably be more noticeable differences, as the Euclidean distance would produce a poor estimate.
+The results of the benchmark are presented in Table \ref{table:road-benchmark}. Again, both $A^*$ algorithms clearly dominate over Dijkstra, and this time the difference was even more noticeable, due to the nature of the graph used. $A^*$ with the Euclidean distance expanded $68.3\%$ less nodes than Dijkstra, and was $71.2\%$ faster, while still finding optimal paths on all 1000 of the test cases. On the other hand, $A^*$ with the great-circle distance dominates over the other $A^*$ algorithm like we expected, expanding $253664$ less nodes, but the execution time is actually higher, taking $17.19 s$ more in total. This is because, even though the heuristic is more precise, and dominates the other one, it's actually more costly to compute, since the haversine formula involves trigonometric functions and their inverses, so the gain we get in memory, we lose in time efficiency. Still, the gain in memory is not that huge, because we are considering points which are relatively close to each other on the globe, where the Euclidean distance is a pretty good approximation of the great-circle distance. If we considered points further apart from each other, then there would probably be more noticeable differences, as the Euclidean distance would produce a poor estimate.
 %TODO Conclusions: balance memory efficiency and time efficiency
 
 \begin{center}
@@ -996,14 +993,14 @@ The results of the benchmark are presented in Table \ref{table:road-benchmark}. 
 Again, we included the Greedy Best-First Search algorithm just to see how fast it can find paths, even though they may not be optimal. This algorithm only found an optimal path 95 out of the 1000 test cases that were executed.
 %TODO Conclusions: good to check if a path exists
 
-
-\chapter{$A^*$ variants}
-
-In the last chapters we have mainly focused on the $A^*$ algorithm. But the addition rule used by the score, $f = g + h$, is not the only way to use the heuristic information we have, and we could also modify the way nodes are expanded, giving rise to new algorithms, fundamentally different from $A^*$, but still close enough to be considered part of the same family. In this chapter we will present some variants of the $A^*$ algorithm, explaining how they fundamentally change from the $A^*$ we have seen, and the benefits that using them may give us.
-
-
-\section{$IDA^*$}
-Iterative Deepening $A^*$, or $\bm{IDA^*}$, is a variant of $A^*$ based on iterative deepening search, which is a modification of Depth-First Search that finds the best depth limit. %TODO talk about DFS in the annex
+%
+%\chapter{$A^*$ variants}
+%
+%In the last chapters we have mainly focused on the $A^*$ algorithm. But the addition rule used by the score, $f = g + h$, is not the only way to use the heuristic information we have, and we could also modify the way nodes are expanded, giving rise to new algorithms, fundamentally different from $A^*$, but still close enough to be considered part of the same family. In this chapter we will present some variants of the $A^*$ algorithm, explaining how they fundamentally change from the $A^*$ we have seen, and the benefits that using them may give us.
+%
+%
+%\section{$IDA^*$}
+%Iterative Deepening $A^*$, or $\bm{IDA^*}$, is a variant of $A^*$ based on iterative deepening search, which is a modification of Depth-First Search that finds the best depth limit. %TODO talk about DFS in the annex
 
 %TODO jump-point searc, beam search, Theta*, D*...
 
@@ -1013,8 +1010,13 @@ Iterative Deepening $A^*$, or $\bm{IDA^*}$, is a variant of $A^*$ based on itera
 
 
 \chapter{Conclusions}
+In this work, we have presented two algorithms which reliably find optimal paths in graphs as long as the necessary conditions are met, namely, 
 
+Dijkstra's algorithm and $A^*$. Dijkstra's algorithm always finds optimal paths given any source node and set of goal nodes, but as it was reflected in our benchmark, it may potentially have to expand lots of nodes to find it. 
 
+On the other hand, $A^*$ uses a heuristic to determine which nodes are more promising to explore next, by giving it a sense of the "direction" where the goal node is, which can avoid having to make many unnecessary node expansions in unpromising directions. But not any heuristic works. We have proved that in order for $A^*$ to reliably find optimal paths, the heuristic must be admissible, that is, it must never overestimate the real cost of an optimal path from a node to a preferred goal node. Moreover, we saw that if the heuristic is also consistent, then the algorithm becomes much more efficient, and avoids having to re-expand already expanded nodes. In general, we saw that higher lower bounds of the real optimal distances lead to better heuristics. On our benchmarks, $A^*$ clearly dominated over Dijkstra, even when the heuristic used, though still admissible, was not the best possible one.
+
+There are many variants to the $A^*$ algorithm, but the core idea of doing an informed search based on a heuristic remains. No other algorithm that can reliably find optimal paths has been found which does better than $A^*$ in all cases, even after 50 years of its invention \cite{hart}, which explains why $A^*$ is still the de facto standard when it comes to pathfinding algorithms in many applications, like game development or robotics, and with the results compiled in this work, we can now understand why.
 
 \begin{appendices}
 
@@ -1067,9 +1069,26 @@ Inserting and looking up data in a map has a time complexity of $O(1)$.
 
 \begin{thebibliography}{99}
 
+\bibitem{dijkstra} E. W. Dijkstra, \textsl{A note on two problems in connexion with graphs}, Numerische Mathematik 1, pp. 269–271, (1959)
+
 \bibitem{hart} P. E. Hart, N. J. Nilsson, and B. Raphael, \textsl{A formal basis for the heuristic determination of minimum cost paths}, (1968), IEEE Transactions of Systems Science and Cybernetics, SSC-4, 2
 
-\bibitem{dimacs} 9th DIMACS Implementation Challenge, \url{http://www.dis.uniroma1.it/challenge9/}
+\bibitem{ai} S. Russell, P. Norvig, \textsl{Artificial Intelligence: A Modern Approach}, Third Edition, chapter 3, (2009)
+
+\bibitem{bellman-ford} Jørgen Bang-Jensen, Gregory Gutin, \textsl{Digraphs: Theory, Algorithms and Applications}, (2000)
+
+\bibitem{optimality} R. Dechter, J. Pearl, \textsl{Generalized Best-First Search Strategies and the Optimality of A*}, Journal of the ACM, 32(3), pp. 505-536, (1985)
+
+\bibitem{martelli} A. Martelli, \textsl{On the complexity of admissible search algorithms}, Artificial Intelligence 8, pp. 1–13, (1977)
+
+\bibitem{inconsistent} N. R. Sturtevant, Z. Zhang, R. Holte, J. Schaeffer, \textsl{Using Inconsistent Heuristics on A* Search}, University of Alberta, Department of Computer Science
+
+\bibitem{dimacs} 9th DIMACS Implementation Challenge,\\
+\url{http://www.dis.uniroma1.it/challenge9/}
+
+\bibitem{bresenham} J. E. Bresenham, "Algorithm for computer control of a digital plotter", \textsl{IBM Systems Journal}, 4(1), pp. 25-30, (1965)
+
+\bibitem{haversine} José de Mendoza y Ríos, "Memoria sobre algunos metodos nuevos de calcular la longitud por las distancias lunares y explicaciones prácticas de una teoría para la solución de otros problemas de navegación", (1795)
 
 \end{thebibliography}
 
