@@ -94,7 +94,6 @@
 \begin{tabular}{ll}
 \textbf{\Large Director:} & \textbf{\Large Dr. Antoni Benseny} \\
 \textbf{\Large Realitzat a:} & \textbf{\Large  Departament de Matemàtica Aplicada i Anàlisi} \\
- & \textbf{\Large (nom del departament)} \\
 \\
 \textbf{\Large Barcelona,} & \textbf{\Large \today }
 \end{tabular}
@@ -105,19 +104,26 @@
 
 
 \section*{Abstract}
-Abstract goes here.
+The aim of this work is to give a rigorous mathematical insight of the most popular pathfinding algorithms, focusing on $A^*$ and trying to understand how the heuristic it uses affects its correctness and performance. We complement this theoretical study of the algorithms with experimental results found by running two benchmarks of the algorithms.
+
 
 \tableofcontents
 
 \pagestyle{fancy}
 \chapter{Introduction}
-Many problems in the fields of science, mathematics and engineering can be generalised to the problem of finding a path in a graph. Examples of such problems include routing of telephone or Internet traffic, layout of printed circuit boards, automated theorem proving, GPS routing, decision making in artificial intelligence and robotics. In this work, we will provide a mathematical and applied approach to this problem.
+Many problems in the fields of science, mathematics and engineering can be generalised to the problem of finding a path in a graph. Examples of such problems include routing of telephone or Internet traffic, layout of printed circuit boards, automated theorem proving, GPS routing, decision making in artificial intelligence and robotics \cite{ai}.
 
-The aim of this work is to give a rigorous mathematical insight of the most popular pathfinding algorithms, focusing on $A^*$ and trying to understand how the heuristic it uses affects its correctness and performance. We complement this theoretical study of the algorithms with experimental results found by implementing and executing the algorithms in two different scenarios.
+A graph is simply a set of nodes connected to each other by edges. Depending on the problem, it can make sense to associate a number with each edge, usually called the weight of the edge. For example, in a geographical map, nodes could represent cities and towns, and the edges could represent the roads that connect them, with the weights being the total distance of each road. Then, one could ask what is the best way to travel from one city to another, that is, the set of roads that one would have to follow so that the total distance travelled is minimal with respect to all the other possible ways to get from that city to the other. One could use a brute force algorithm by finding all the possible combinations of roads that start and end at the desired cities and selecting the one with minimal distance, but as the number of nodes and edges grows larger, the number of combinations would grow extremely large and eventually we would run out of memory or the execution may take too long. That is where more sophisticated pathfinding algorithms, like the ones presented in this work, come in.
 
-For most of the examples we will be using a grid graph, represented by a tiled 2D map, in which each tile or node is connected to its adjacent tiles. In the map, each tile can have a different weight, or be a wall, which is impassable. This notion of weighted nodes and walls can be translated to the structure of a weighted directed graph by thinking of the weights of the tiles as the weights of the edges that connect adjacent tiles to it. Walls can be thought of as nodes that are not connected (or just non-existent) to any other node, and therefore not reachable from other nodes. A pathfinding simulator was built for this work to help illustrate these examples.
+For this project, we built a pathfinding simulator which implements all the algorithms presented in the work. For the graphical part of the simulator, which will also be used to provide some example images, we use a grid graph, represented by a tiled 2D map, in which each tile or node is connected to its adjacent tiles. In the map, each tile can have a different weight, or be a wall, which is impassable. This notion of weighted nodes and walls can be translated to the structure of a weighted directed graph by thinking of the weights of the tiles as the weights of the edges that connect adjacent tiles to it. Walls can be thought of as nodes that are not connected to any other node, or that just do not exist, and therefore are not reachable from other nodes. However, the algorithms implemented are general enough to work with any other graph specification, and we will also use them with a graph generated from the roads in Florida for one of the benchmarks in the experimental part.
 
-More information about possible applications can be found in many resources, for exmaple, in \cite{ai}. %TODO add more
+In Chapter 2, we provide the mathematical background and definitions we will be using throughout the entire work. Then, we present the main algorithm we will focus on, $A^*$, building up to it by first discussing other algorithms which are key to understanding how it works, since it will borrow some ideas from them. We will also prove how under certain conditions, the algorithm always finds optimal paths between any two points.
+
+In Chapter 3 we go into detail on the main thing that makes $A^*$ special, which is the use of a heuristic function. We will see different results regarding heuristics, and see that for heuristics which satisfy a certain condition, the algorithm becomes much more efficient. In this chapter we also define some heuristics for grid graphs which work well in different situations.
+
+Chapter 4 is a short chapter where we describe, from a user standpoint, the simulator that was developed, briefly explaining its options and functionality.
+
+Finally, on Chapter 5, we discuss the experimental part of this work. We explain in detail the benchmarks that were performed, and present its results.
 
 
 \chapter{The $A^*$ algorithm}
@@ -1069,11 +1075,11 @@ Inserting and looking up data in a map has a time complexity of $O(1)$.
 
 \begin{thebibliography}{99}
 
+\bibitem{ai} S. Russell, P. Norvig, \textsl{Artificial Intelligence: A Modern Approach}, Third Edition, chapter 3, (2009)
+
 \bibitem{dijkstra} E. W. Dijkstra, \textsl{A note on two problems in connexion with graphs}, Numerische Mathematik 1, pp. 269–271, (1959)
 
 \bibitem{hart} P. E. Hart, N. J. Nilsson, and B. Raphael, \textsl{A formal basis for the heuristic determination of minimum cost paths}, (1968), IEEE Transactions of Systems Science and Cybernetics, SSC-4, 2
-
-\bibitem{ai} S. Russell, P. Norvig, \textsl{Artificial Intelligence: A Modern Approach}, Third Edition, chapter 3, (2009)
 
 \bibitem{bellman-ford} Jørgen Bang-Jensen, Gregory Gutin, \textsl{Digraphs: Theory, Algorithms and Applications}, (2000)
 
