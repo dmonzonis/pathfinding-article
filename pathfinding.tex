@@ -981,7 +981,6 @@ Every node has a latitude and longitude associated given in microdegrees, which 
 Similar to the procedure of the first benchmark, we randomly select two nodes and execute each of the algorithms until it terminates, and we repeat this process for 1000 times. Like before, we evaluated 4 algorithms: Dijkstra's algorithm, $A^*$ with the Euclidean distance as heuristic, $A^*$ with the great-circle distance as heuristic, and Greedy Best-First Search with the Euclidean distance as heuristic. It is clear that both heuristics are admissible in this problem, but by Theorem \ref{thm:dominating-heuristic}, we expect the algorithm that uses the great-circle distance to dominate over the algorithm that uses the Euclidean distance.
 
 The results of the benchmark are presented in Table \ref{table:road-benchmark}. Again, both $A^*$ algorithms clearly dominate over Dijkstra, and this time the difference was even more noticeable, due to the nature of the graph used. $A^*$ with the Euclidean distance expanded $68.3\%$ less nodes than Dijkstra, and was $71.2\%$ faster, while still finding optimal paths on all 1000 of the test cases. On the other hand, $A^*$ with the great-circle distance dominates over the other $A^*$ algorithm like we expected, expanding $253664$ less nodes, but the execution time is actually higher, taking $17.19 s$ more in total. This is because, even though the heuristic is more precise, and dominates the other one, it's actually more costly to compute, since the haversine formula involves trigonometric functions and their inverses, so the gain we get in memory, we lose in time efficiency. Still, the gain in memory is not that huge, because we are considering points which are relatively close to each other on the globe, where the Euclidean distance is a pretty good approximation of the great-circle distance. If we considered points further apart from each other, then there would probably be more noticeable differences, as the Euclidean distance would produce a poor estimate.
-%TODO Conclusions: balance memory efficiency and time efficiency
 
 \begin{center}
 	\begin{tabular}{lcc}
@@ -997,7 +996,6 @@ The results of the benchmark are presented in Table \ref{table:road-benchmark}. 
 \end{center}
 
 Again, we included the Greedy Best-First Search algorithm just to see how fast it can find paths, even though they may not be optimal. This algorithm only found an optimal path 95 out of the 1000 test cases that were executed.
-%TODO Conclusions: good to check if a path exists
 
 %
 %\chapter{$A^*$ variants}
@@ -1010,8 +1008,6 @@ Again, we included the Greedy Best-First Search algorithm just to see how fast i
 
 %TODO jump-point searc, beam search, Theta*, D*...
 
-
-%TODO make chapter on tie-breaking rules
 %TODO make chapter on applications: 8-puzzle? route finding, AI, etc...
 
 
@@ -1021,6 +1017,10 @@ In this work, we have presented two algorithms which reliably find optimal paths
 Dijkstra's algorithm and $A^*$. Dijkstra's algorithm always finds optimal paths given any source node and set of goal nodes, but as it was reflected in our benchmark, it may potentially have to expand lots of nodes to find it. 
 
 On the other hand, $A^*$ uses a heuristic to determine which nodes are more promising to explore next, by giving it a sense of the "direction" where the goal node is, which can avoid having to make many unnecessary node expansions in unpromising directions. But not any heuristic works. We have proved that in order for $A^*$ to reliably find optimal paths, the heuristic must be admissible, that is, it must never overestimate the real cost of an optimal path from a node to a preferred goal node. Moreover, we saw that if the heuristic is also consistent, then the algorithm becomes much more efficient, and avoids having to re-expand already expanded nodes. In general, we saw that higher lower bounds of the real optimal distances lead to better heuristics. On our benchmarks, $A^*$ clearly dominated over Dijkstra, even when the heuristic used, though still admissible, was not the best possible one.
+
+As we saw in our roadmap benchmark, having a more precise heuristic is not always ideal. As we saw in Theorem \ref{thm:dominating-heuristic}, with a more precise heuristic, the algorithm will generally expand fewer nodes, which is true in our benchmark. However, due to the heuristic being more costly to compute, the time efficiency is actually worse than if we used a less precise heuristic which is faster to compute. This brings up a trade-off with which we have to deal when choosing an heuristic, and that is memory efficiency versus time efficiency. Finding the perfect balance between both is usually hard, so one has to choose depending on the specific priorities of the problem at hand.
+
+We also briefly commented on the Greedy Best-First Search algorithm, which served us to present the concept of heuristics, but as we saw in our benchmarks, it fails to find optimal paths, as it is not designed for that. However, even if the path it finds is not optimal, it will always find a path if it exists, and given how much faster it is than the other algorithms, it could be a very good choice if all we need to do is prove if two nodes are connected, that is, checking if a path exists between two nodes.
 
 There are many variants to the $A^*$ algorithm, but the core idea of doing an informed search based on a heuristic remains. No other algorithm that can reliably find optimal paths has been found which does better than $A^*$ in all cases, even after 50 years of its invention \cite{hart}, which explains why $A^*$ is still the de facto standard when it comes to pathfinding algorithms in many applications, like game development or robotics, and with the results compiled in this work, we can now understand why.
 
